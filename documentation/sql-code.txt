@@ -15,7 +15,7 @@ CREATE TABLE reservations (
 );
 
 
-CREATE TABLE adress (
+CREATE TABLE adresses (
   id bigint NOT NULL PRIMARY KEY,
   streetName varchar(500),
   houseNumber bigint,
@@ -89,7 +89,7 @@ CREATE TABLE cinemaShows (
 );
 
 
-ALTER TABLE adress ADD CONSTRAINT adress_id_fk FOREIGN KEY (id) REFERENCES cinemaHeadquarters (headquarterAdressID);
+ALTER TABLE adresses ADD CONSTRAINT adress_id_fk FOREIGN KEY (id) REFERENCES cinemaHeadquarters (headquarterAdressID);
 ALTER TABLE cinemaChains ADD CONSTRAINT cinemaChains_id_fk FOREIGN KEY (id) REFERENCES cinemaHeadquarters (cinemaChainID);
 ALTER TABLE cinemaHeadquarters ADD CONSTRAINT cinemaHeadquarters_id_fk FOREIGN KEY (id) REFERENCES cinemaRooms (headquarterID);
 ALTER TABLE cinemaRooms ADD CONSTRAINT cinemaRooms_id_fk FOREIGN KEY (id) REFERENCES seats (cinemaRoomID);
