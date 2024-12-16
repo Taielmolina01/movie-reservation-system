@@ -1,0 +1,102 @@
+
+
+CREATE TABLE cinemaChains (
+  id bigint NOT NULL PRIMARY KEY,
+  name varchar(500) NOT NULL
+);
+
+
+CREATE TABLE cinemaHeadquarters (
+  id bigint NOT NULL PRIMARY KEY,
+  cinemaChainID bigint,
+  headquarterAdressID bigint
+);
+
+
+CREATE TABLE users (
+  id bigint NOT NULL PRIMARY KEY,
+  email varchar(500) NOT NULL,
+  name varchar(500) NOT NULL,
+  password varchar(500)
+);
+
+
+CREATE TABLE tokens (
+  id bigint NOT NULL PRIMARY KEY,
+  accessToken varchar(500) NOT NULL,
+  refreshToken varchar(500) NOT NULL,
+  createdAt date NOT NULL,
+  expiresAt date NOT NULL,
+  userID bigint
+);
+
+
+CREATE TABLE movies (
+  id bigint NOT NULL PRIMARY KEY,
+  title varchar(500) NOT NULL,
+  description varchar(500) NOT NULL,
+  poster varchar(500) NOT NULL,
+  genre enum NOT NULL
+);
+
+
+CREATE TABLE cinemaShows (
+  id bigint NOT NULL PRIMARY KEY,
+  showDate date,
+  movieID bigint,
+  cinemaRoomID bigint
+);
+
+
+CREATE TABLE seats (
+  id bigint NOT NULL PRIMARY KEY,
+  row enum NOT NULL,
+  number smallint NOT NULL,
+  cinemaRoomID bigint NOT NULL
+);
+
+
+CREATE TABLE reservations (
+  id bigint NOT NULL PRIMARY KEY,
+  reservationDate date,
+  userID bigint,
+  cinemaShowID bigint
+);
+
+
+CREATE TABLE cinemaRooms (
+  id bigint NOT NULL PRIMARY KEY,
+  headquarterID bigint
+);
+
+
+CREATE TABLE adress (
+  id bigint NOT NULL PRIMARY KEY,
+  streetName varchar(500),
+  houseNumber bigint,
+  city varchar(500),
+  state varchar(500),
+  country varchar(500),
+  postalCode int
+);
+
+
+CREATE TABLE reservedSeats (
+  id bigint NOT NULL PRIMARY KEY,
+  reservationID bigint,
+  seatID bigint
+);
+
+
+ALTER TABLE movies ADD CONSTRAINT movies_id_fk FOREIGN KEY (id) REFERENCES cinemaShows (movieID);
+ALTER TABLE cinemaChains ADD CONSTRAINT cinemaChains_id_fk FOREIGN KEY (id) REFERENCES cinemaHeadquarters (cinemaChainID);
+ALTER TABLE users ADD CONSTRAINT users_id_fk FOREIGN KEY (id) REFERENCES tokens (userID);
+ALTER TABLE adress ADD CONSTRAINT adress_id_fk FOREIGN KEY (id) REFERENCES cinemaHeadquarters (headquarterAdressID);
+ALTER TABLE cinemaHeadquarters ADD CONSTRAINT cinemaHeadquarters_id_fk FOREIGN KEY (id) REFERENCES cinemaRooms (headquarterID);
+ALTER TABLE users ADD CONSTRAINT users_id_fk FOREIGN KEY (id) REFERENCES reservations (id);
+ALTER TABLE cinemaRooms ADD CONSTRAINT cinemaRooms_id_fk FOREIGN KEY (id) REFERENCES seats (cinemaRoomID);
+ALTER TABLE reservations ADD CONSTRAINT reservations_id_fk FOREIGN KEY (id) REFERENCES reservedSeats (reservationID);
+ALTER TABLE seats ADD CONSTRAINT seats_id_fk FOREIGN KEY (id) REFERENCES reservedSeats (seatID);
+ALTER TABLE reservations ADD CONSTRAINT reservations_cinemaShowID_fk FOREIGN KEY (cinemaShowID) REFERENCES cinemaShows (id);
+ALTER TABLE cinemaRooms ADD CONSTRAINT movie-theaters_id_fk FOREIGN KEY (id) REFERENCES cinemaShows (cinemaRoomID);
+
