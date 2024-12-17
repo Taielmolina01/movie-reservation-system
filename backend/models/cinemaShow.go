@@ -3,15 +3,23 @@ package models
 import (
 	"github.com/google/uuid"
 	"time"
+	"gorm.io/gorm"
 )
 
 type CinemaShow struct {	
-	ShowDate time.Time
+	ShowDate time.Time `gorm:"not null`
 }
 
 type CinemaShowDB struct {
-	// MovieID
-	// CinemaRoomID
-	Id uuid.UUID
-	CinemaShow *CinemaShow
+	ID uuid.UUID `gorm:"type:uuid;primaryKey"`
+	CinemaShow CinemaShow `gorm:"embedded"`
+	// FK
+	MovieID uuid.UUID  `gorm:"type:uuid;not null"`
+	// Declare relationship CinemaShow - Movie
+	Movie MovieDB `gorm:"foreignKey:MovieID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	// FK
+	CinemaRoomID uuid.UUID `gorm:"type:uuid;not null"`
+	// Declare relationship CinemaShow - CinemaRoom
+	CinemaRoom CinemaRoomDB `gorm:"foreignKey:CinemaRoomID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	gorm.Model
 }

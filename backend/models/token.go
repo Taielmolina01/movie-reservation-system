@@ -3,17 +3,20 @@ package models
 import (
 	"github.com/google/uuid"
 	"time"
+	"gorm.io/gorm"
 )
 
 type Token struct {	
-	AccessToken	string
-	RefreshToken string
-	CreatedAt time.Time
-	ExpiresAt time.Time
+	AccessToken	string `gorm:"type:varchar(255);not null"`
+	RefreshToken string `gorm:"type:varchar(255);not null"`
+	CreatedAt time.Time `gorm:"not null"`
+	ExpiresAt time.Time `gorm:"not null"`
 }
 
 type TokenDB struct {
-	Id uuid.UUID
-	Token *Token
-	// userID
+	ID uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Token Token `gorm:"embedded"`
+	UserID uuid.UUID `gorm:"type:uuid;not null"`
+	User UserDB `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	gorm.Model
 }

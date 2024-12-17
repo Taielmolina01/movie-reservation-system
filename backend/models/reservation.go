@@ -3,15 +3,19 @@ package models
 import (
 	"github.com/google/uuid"
 	"time"
+	"gorm.io/gorm"
 )
 
 type Reservation struct {	
-	Date time.Time
+	Date time.Time `gorm:"not null"`
 }
 
 type ReservationDB struct {
-	Id uuid.UUID
-	Reservation *Reservation
-	// UserId
-	// CinemaShowID
+	ID uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Reservation Reservation `gorm:"embedded"`
+	UserID uuid.UUID `gorm:"type:uuid;not null"`
+	User UserDB `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	CinemaShowID uuid.UUID `gorm:"type:uuid;not null"`
+	CinemaShow CinemaShowDB `gorm:"foreignKey:CinemaShowID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	gorm.Model
 }

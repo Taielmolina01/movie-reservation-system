@@ -2,16 +2,19 @@ package models
 
 import (
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
-// aca tengo que ver que onda porque perse el headquarter no tendria nada
-
 type CinemaRoom struct {	
-	DiagramRoom string
+	DiagramRoom []byte `gorm:"type:bytea;not null"` 
 }
 
 type CinemaRoomDB struct {
-	Id uuid.UUID
-	CinemaRoom *CinemaRoom
-	// HeadquarterID
+	ID uuid.UUID `gorm:"type:uuid;primaryKey"`
+	CinemaRoom CinemaRoom `gorm:"embedded"`
+	// FK
+	HeadquarterID uuid.UUID `gorm:"type:uuid;not null"`
+	// Declare relationship CinemaRoom - CinemaHeadquarter
+	Headquarter CinemaHeadquarterDB `gorm:"foreignKey:HeadquarterID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	gorm.Model
 }

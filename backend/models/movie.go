@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 
@@ -23,7 +24,7 @@ const (
 	Musical
 	Mystery
 	Romance
-	Science Fiction
+	ScienceFiction
 	Sports
 	Thriller
 	War
@@ -43,7 +44,7 @@ func (mg MovieGenre) String() string {
 		"Fantasy",
 		"Family",
 		"History",
-		"Horror"
+		"Horror",
 		"Musical",
 		"Mystery",
 		"Romance",
@@ -51,7 +52,7 @@ func (mg MovieGenre) String() string {
 		"Sports",
 		"Thriller",
 		"War",
-		"Western"
+		"Western",
 		}[mg]
 }
 
@@ -60,13 +61,14 @@ func (mg MovieGenre) EnumIndex() int {
 }
 
 type Movie struct {	
-	Title string
-	Description string
-	Poster string
-	Genre MovieGenre
+	Title string `gorm:"type:varchar(100);not null"`
+	Description string `gorm:"type:varchar(255);not null"`
+	Poster []byte `gorm:"type:bytea;not null"` 
+	Genre MovieGenre `gorm:"type:varchar(50);not null`
 }
 
 type MovieDB struct {
-	Id uuid.UUID
-	Movie *Movie
+	ID uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Movie Movie `gorm:"embedded"`
+	gorm.Model
 }

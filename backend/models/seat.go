@@ -1,5 +1,10 @@
 package models
 
+import (
+	"gorm.io/gorm"
+	"github.com/google/uuid"
+)
+
 type SeatRow int
 
 const (
@@ -26,27 +31,9 @@ const (
 )
 
 func (s SeatRow) String() string {
-	return [...]string{
-		"A",
-		"B",
-		"C",
-		"D",
-		"E",
-		"F",
-		"G",
-		"H",
-		"I",
-		"J",
-		"K",
-		"L",
-		"M",
-		"N",
-		"O",
-		"P",
-		"Q",
-		"R",
-		"S",
-		"T"
+	return []string{
+		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+		"K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
 		}[s]
 }
 
@@ -55,12 +42,14 @@ func (s SeatRow) EnumIndex() int {
 }
 
 type Seat struct {	
-	Row SeatRow
-	Number int
+	Row SeatRow `gorm:"type:varchar(2);not null"`
+	Number int `gorm:"not null"`
 }
 
 type SeatDB struct {
-	Id uuid.UUID
-	Seat *Seat
-	// cinemaRoomID
+	ID uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Seat Seat `gorm:"embedded"`
+	CinemaRoomID uuid.UUID `gorm:"type:uuid;not null"`
+	CinemaRoom CinemaRoomDB `gorm:"foreignKey:CinemaRoomID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	gorm.Model
 }
