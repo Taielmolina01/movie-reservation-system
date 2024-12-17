@@ -8,7 +8,7 @@ import (
     "os"
 )
 
-var DB *gorm.DB
+var db *gorm.DB
 
 const (
 	MESSAGE_ERROR_CONNECTING_DB = "Error connecting to the database"

@@ -60,7 +60,8 @@ CREATE TABLE seats (
 CREATE TABLE cinemaHeadquarters (
   id bigint NOT NULL PRIMARY KEY,
   cinemaChainID bigint,
-  headquarterAdressID bigint
+  headquarterAdressID bigint,
+  name varchar(500)
 );
 
 
@@ -98,6 +99,6 @@ ALTER TABLE movies ADD CONSTRAINT movies_id_fk FOREIGN KEY (id) REFERENCES cinem
 ALTER TABLE reservations ADD CONSTRAINT reservations_cinemaShowID_fk FOREIGN KEY (cinemaShowID) REFERENCES cinemaShows (id);
 ALTER TABLE reservations ADD CONSTRAINT reservations_id_fk FOREIGN KEY (id) REFERENCES reservedSeats (reservationID);
 ALTER TABLE seats ADD CONSTRAINT seats_id_fk FOREIGN KEY (id) REFERENCES reservedSeats (seatID);
-ALTER TABLE users ADD CONSTRAINT users_id_fk FOREIGN KEY (id) REFERENCES reservations (id);
 ALTER TABLE users ADD CONSTRAINT users_id_fk FOREIGN KEY (id) REFERENCES tokens (userID);
+ALTER TABLE users ADD CONSTRAINT users_id_fk FOREIGN KEY (id) REFERENCES reservations (userID);
 
