@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	MESSAGE_ERROR_LOADING_ENV = "Error loading the environment variables: %v"
+	MESSAGE_ERROR_LOADING_ENV   = "Error loading the environment variables: %v"
 	MESSAGE_SUCCESS_LOADING_ENV = "Success loading the environment variables"
 )
 

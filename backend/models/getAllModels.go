@@ -1,4 +1,4 @@
-package models 
+package models
 
 func GetAllModels() []interface{} {
 	return []interface{}{

@@ -5,12 +5,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type CinemaRoom struct {	
-	DiagramRoom []byte `gorm:"type:bytea;not null"` 
+type CinemaRoom struct {
+	DiagramRoom []byte `gorm:"type:bytea;not null"`
 }
 
 type CinemaRoomDB struct {
-	ID uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ID         uuid.UUID  `gorm:"type:uuid;primaryKey"`
 	CinemaRoom CinemaRoom `gorm:"embedded"`
 	// FK
 	HeadquarterID uuid.UUID `gorm:"type:uuid;not null"`
