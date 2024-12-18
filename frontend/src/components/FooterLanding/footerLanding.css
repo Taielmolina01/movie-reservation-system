@@ -1,0 +1,8 @@
+.footer-landing {
+    --footer-landing-bg-color: #07071c;
+    background-color: var(--footer-landing-bg-color);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
