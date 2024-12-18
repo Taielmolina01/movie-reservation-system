@@ -12,6 +12,14 @@ func (e ErrorUserNotExist) Error() string {
 	return fmt.Sprintf("User with email %s is not registered", e.Email)
 }
 
+type ErrorUserAlreadyExist struct {
+	Email string
+}
+
+func (e ErrorUserAlreadyExist) Error() string {
+	return fmt.Sprintf("User with email %s is already registered", e.Email)
+}
+
 type ErrorUserMustHaveEmail struct {}
 
 func (e ErrorUserMustHaveEmail) Error() string {

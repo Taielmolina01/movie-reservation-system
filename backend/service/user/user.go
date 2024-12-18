@@ -4,10 +4,8 @@ import (
 	"movie-reservation-system/repository"
 	"movie-reservation-system/models"
 	"strings"
-	"errors"
+	"movie-reservation-system/errors"
 )
-
-
 
 type UserServiceImpl struct {
 	userRepository repository.User
@@ -31,12 +29,22 @@ func (us *UserServiceImpl) CreateUser(req *models.UserRequest) (*models.UserDB, 
 	}
 
 	// Call to the db to validate that the user doesnt already exist
+	user, userError := us.GetUser(req.Email)
+
+	if userError != nil {
+		return nil, errors.ErrorUserAlreadyExist{}.Error()
+	}
+
+	// Must hash the password
+
 
 	// Save user in the db
+	return us.userRepository.CreateUser(user)
 }
 
 func (us *UserServiceImpl) GetUser(email string) (*models.UserDB, error) {
 	// Get user from the db
+	return us.userRepository.GetUser(email)
 }
 
 func (us *UserServiceImpl) UpdateUser(req *models.UserUpdateRequest) (*models.UserDB, error) {
@@ -57,6 +65,7 @@ func (us *UserServiceImpl) UpdateUser(req *models.UserUpdateRequest) (*models.Us
 	}
 
 	// Save updated user in the db
+	return us.UserRepository.UpdateUser(user)
 }	
 
 func (us *UserServiceImpl) UpdatePassword(req *models.UserUpdatePasswordRequest) (*models.UserDB, error) {
@@ -77,9 +86,10 @@ func (us *UserServiceImpl) UpdatePassword(req *models.UserUpdatePasswordRequest)
 	}
 
 	// Update password
-	user.Password = req.NewPassword
+	user.Password = req.NewPassword // Must hash the password here
 
 	// Save updated user in the db
+	return us.UserRepository.UpdateUser(user)
 }
 
 func (us *UserServiceImpl) DeleteUser(email string) (*models.UserDB, error) {
@@ -91,6 +101,7 @@ func (us *UserServiceImpl) DeleteUser(email string) (*models.UserDB, error) {
 	}
 
 	// Delete user from the db
+	return us.userRepository.DeleteUser(user)
 }
 	
 
