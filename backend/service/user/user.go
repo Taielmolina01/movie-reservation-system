@@ -1,9 +1,10 @@
 package user
 
 import (
-	"movie-reservation-system/repository/user"
-	"movie-reservation-system/models"
+	"golang.org/x/crypto/bcrypt"
 	"movie-reservation-system/errors"
+	"movie-reservation-system/models"
+	"movie-reservation-system/repository/user"
 	"movie-reservation-system/service"
 )
 
@@ -15,6 +16,15 @@ func NewUserServiceImpl(userRepository repository.UserRepository) UserService {
 	return &UserServiceImpl{UserRepository: userRepository}
 }
 
+func mapUserRequestToUserDB(req *models.UserRequest) *models.UserDB {
+	return &models.UserDB{
+		Email:    req.Email,
+		Name:     req.Name,
+		Password: req.Password,
+		Role:     req.Role,
+	}
+}
+
 func (us *UserServiceImpl) CreateUser(req *models.UserRequest) (*models.UserDB, error) {
 	// Validate fields of request
 	if err := service.ValidateUserFields(req); err != nil {
@@ -22,17 +32,25 @@ func (us *UserServiceImpl) CreateUser(req *models.UserRequest) (*models.UserDB, 
 	}
 
 	// Call to the db to validate that the user doesnt already exist
-	user, userError := us.GetUser(req.Email)
+	_, userError := us.GetUser(req.Email)
 
 	if userError != nil {
 		return nil, errors.ErrorUserAlreadyExist{}
 	}
 
 	// Must hash the password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
 
+	if err != nil {
+		return nil, errors.ErrorEncriptyngPassword{}
+	}
+
+	req.Password = string(hashedPassword)
+
+	newUser := mapUserRequestToUserDB(req)
 
 	// Save user in the db
-	return us.UserRepository.CreateUser(user)
+	return us.UserRepository.CreateUser(newUser)
 }
 
 func (us *UserServiceImpl) GetUser(email string) (*models.UserDB, error) {
@@ -42,19 +60,19 @@ func (us *UserServiceImpl) GetUser(email string) (*models.UserDB, error) {
 
 func (us *UserServiceImpl) UpdateUser(email string, req *models.UserUpdateRequest) (*models.UserDB, error) {
 	// Get user from the db
-	user, err := us.GetUser(email) 
+	user, err := us.GetUser(email)
 
 	if err != nil {
 		return nil, errors.ErrorUserNotExist{email}
 	}
 
-	if err := service.ValidateUserUpdateFields(req); err != nil {
+	if err := service.ValidateAndUpdateUser(req, user); err != nil {
 		return nil, err
 	}
 
 	// Save updated user in the db
 	return us.UserRepository.UpdateUser(user)
-}	
+}
 
 func (us *UserServiceImpl) UpdateUserPassword(req *models.UserUpdatePasswordRequest) (*models.UserDB, error) {
 	// Get user from the db
@@ -82,7 +100,7 @@ func (us *UserServiceImpl) UpdateUserPassword(req *models.UserUpdatePasswordRequ
 
 func (us *UserServiceImpl) DeleteUser(email string) (*models.UserDB, error) {
 	// Get user from the db
-	user, err := us.GetUser(email) 
+	user, err := us.GetUser(email)
 
 	if err != nil {
 		return nil, errors.ErrorUserNotExist{email}
@@ -91,6 +109,3 @@ func (us *UserServiceImpl) DeleteUser(email string) (*models.UserDB, error) {
 	// Delete user from the db
 	return us.UserRepository.DeleteUser(user)
 }
-	
-
-

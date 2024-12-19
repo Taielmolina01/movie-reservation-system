@@ -1,10 +1,11 @@
 package service
 
 import (
+	"golang.org/x/crypto/bcrypt"
+	"movie-reservation-system/errors"
+	"movie-reservation-system/models"
 	"reflect"
 	"strings"
-	"movie-reservation-system/models"
-	"movie-reservation-system/errors"
 )
 
 func trimStructFields(s interface{}) {
@@ -48,29 +49,39 @@ func ValidateUserFields(req *models.UserRequest) error {
 	return nil
 }
 
-func ValidateUserUpdateFields(req *models.UserUpdateRequest) error {
+func ValidateAndUpdateUser(req *models.UserUpdateRequest, user *models.UserDB) error {
 	trimStructFields(req)
 
+	// Validate fields
 	if req.Name != nil && *req.Name == "" {
 		return errors.ErrorUserMustHaveName{}
-	}
-
-	if req.Password != nil && len(*req.Password) < 8 {
-		return errors.ErrorPasswordMustHaveLenght8{}
 	}
 
 	if req.Role != nil && !Contains(models.GetRoles(), string(*req.Role)) {
 		return errors.ErrorUserRoleInvalid{Role: string(*req.Role)}
 	}
 
+	// Update fileds
+	if req.Name != nil {
+		user.Name = *req.Name
+	}
+
+	if req.Role != nil {
+		user.Role = *req.Role
+	}
+
 	return nil
 }
 
 func Contains(slice []string, value string) bool {
-    for _, v := range slice {
-        if v == value {
-            return true
-        }
-    }
-    return false
+	for _, v := range slice {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
+
+func ValidatePassword(storedPassword string, enteredPassword string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(enteredPassword)) == nil
 }

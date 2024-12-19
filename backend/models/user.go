@@ -7,7 +7,7 @@ import (
 type Role string
 
 const (
-	User Role = "user"
+	User  Role = "user"
 	Admin Role = "admin"
 )
 
@@ -23,18 +23,17 @@ type UserRequest struct {
 }
 
 type UserLoginRequest struct {
-	Email	string `json:"email" binding:"required,email"`
-	Password	string `json:"password" binding:"required,min=8"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=8"`
 }
 
 type UserUpdateRequest struct {
-	Name	*string	`json:"name" binding:"omitempty"`
-	Password	*string	`json:"password" binding:"omitempty,min=8"`
-	Role     *Role   `json:"role" binding:"omitempty,oneof=user admin"`
+	Name *string `json:"name" binding:"omitempty"`
+	Role *Role   `json:"role" binding:"omitempty,oneof=user admin"`
 }
 
 type UserUpdatePasswordRequest struct {
-	Email string `josn:"email" binding:"required,email"`
+	Email       string `josn:"email" binding:"required,email"`
 	OldPassword string `json:"oldpassword" binding:"required,min=8"`
 	NewPassword string `json:"newpassword" binding:"required,min=8"`
 }
@@ -43,6 +42,6 @@ type UserDB struct {
 	Email    string `gorm:"type:varchar(100);primaryKey"`
 	Name     string `gorm:"type:varchar(100);not null"`
 	Password string `gorm:"type:varchar(100);not null" validate:"required,min=8"`
-	Role	Role	`gorm:"type:varchar(30);default:user`
+	Role     Role   `gorm:"type:varchar(30);default:user`
 	gorm.Model
 }

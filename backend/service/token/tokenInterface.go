@@ -5,7 +5,6 @@ import (
 )
 
 type TokenService interface {
-
 	Login(*models.UserLoginRequest)
 
 	Logout()
