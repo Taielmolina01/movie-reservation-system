@@ -34,7 +34,7 @@ func (e ErrorUserMustHaveName) Error() string {
 
 type ErrorPasswordMustHaveLenght8 struct {}
 
-func (e ErrorUserNotExist) Error() string {
+func (e ErrorPasswordMustHaveLenght8) Error() string {
 	return "Password must have at least eight characters"
 }
 

@@ -2,7 +2,9 @@ package repository
 
 import (
 	"movie-reservation-system/models"
-	"movie-reservation-system/errors"
+	ownErrors "movie-reservation-system/errors"
+	"gorm.io/gorm"
+	"errors"
 )
 
 type UserRepositoryImpl struct {
@@ -15,37 +17,38 @@ func CreateRepositoryImpl(db *gorm.DB) UserRepository {
 
 func (ur *UserRepositoryImpl) CreateUser(user *models.UserDB) (*models.UserDB, error) {
 	result := ur.db.Create(user)
-	if userResponse.Error != nil {
+	if result.Error != nil {
 		return nil, result.Error
 	}
-	return result, nil
+	return user, nil
 }
 	
-func (ur *UserRepositoryImpl) GetUser(email string) (user *models.UserDB, error) {
-	result := db.First(&models.UserDB, "email = ?", email)
+func (ur *UserRepositoryImpl) GetUser(email string) (*models.UserDB, error) {
+	user := &models.UserDB{}
+	result := ur.db.First(&models.UserDB{}, "email = ?", email)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, errors.ErrorUserNotExist{Email: email}.Error()
+		return nil, ownErrors.ErrorUserNotExist{Email: email}
 	}
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return result, nil
+	return user, nil
 }
 
-func (ur *UserRepositoryImpl) UpdateUser(*models.UserDB) (user *models.UserDB, error) {
+func (ur *UserRepositoryImpl) UpdateUser(user *models.UserDB) (*models.UserDB, error) {
 	result := ur.db.Save(user)
 
     if result.Error != nil {
         return nil, result.Error
     }
 
-    return result, nil
+    return user, nil
 }
 
-func (ur *UserRepositoryImpl) DeleteUser(*models.UserDB) (user *models.UserDB, error) {
+func (ur *UserRepositoryImpl) DeleteUser(user *models.UserDB) (*models.UserDB, error) {
 	result := ur.db.Delete(user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return result, nil
+	return user, nil
 }

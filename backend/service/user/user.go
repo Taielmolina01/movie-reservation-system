@@ -1,88 +1,76 @@
-package service
+package user
 
 import (
-	"movie-reservation-system/repository"
+	"movie-reservation-system/repository/user"
 	"movie-reservation-system/models"
-	"strings"
 	"movie-reservation-system/errors"
+	"movie-reservation-system/service"
 )
 
 type UserServiceImpl struct {
-	userRepository repository.User
+	UserRepository repository.UserRepository
 }
 
-func NewUserServiceImpl(userRepository repository.User) UserService {
-	return &UserServiceImpl{userRepository: userRepository}
+func NewUserServiceImpl(userRepository repository.UserRepository) UserService {
+	return &UserServiceImpl{UserRepository: userRepository}
 }
 
 func (us *UserServiceImpl) CreateUser(req *models.UserRequest) (*models.UserDB, error) {
 	// Validate fields of request
-	TrimStructFields(req)
-	if req.Email == ''{
-		return nil, errors.ErrorUserMustHaveEmail{}.Error()
-	} else if req.Name == '' {
-		return nil, errors.ErrorUserMustHaveName{}.Error()
-	} else if len(req.Password) < 8 {
-		return nil, errors.ErrorPasswordMustHaveLenght8{}.Error()
-	} else if !Contains(models.GetRoles(), req.Role) {
-		return nil, errors.ErrorUserRoleInvalid{req.Role}.Error() 
+	if err := service.ValidateUserFields(req); err != nil {
+		return nil, err
 	}
 
 	// Call to the db to validate that the user doesnt already exist
 	user, userError := us.GetUser(req.Email)
 
 	if userError != nil {
-		return nil, errors.ErrorUserAlreadyExist{}.Error()
+		return nil, errors.ErrorUserAlreadyExist{}
 	}
 
 	// Must hash the password
 
 
 	// Save user in the db
-	return us.userRepository.CreateUser(user)
+	return us.UserRepository.CreateUser(user)
 }
 
 func (us *UserServiceImpl) GetUser(email string) (*models.UserDB, error) {
 	// Get user from the db
-	return us.userRepository.GetUser(email)
+	return us.UserRepository.GetUser(email)
 }
 
-func (us *UserServiceImpl) UpdateUser(req *models.UserUpdateRequest) (*models.UserDB, error) {
+func (us *UserServiceImpl) UpdateUser(email string, req *models.UserUpdateRequest) (*models.UserDB, error) {
 	// Get user from the db
-	user, err := us.GetUser(email) // Should read the email from the endpoint path
+	user, err := us.GetUser(email) 
 
 	if err != nil {
-		return nil, errors.ErrorUserNotExist{email}.Error()
+		return nil, errors.ErrorUserNotExist{email}
 	}
 
-	// Updating fields
-	if req.Email != nil {
-		user.Email = req.Email
-	} else if req.Name != nil {
-		user.Name = req.Name
-	} else if req.Role != nil {
-		user.Role = req.Role
+	if err := service.ValidateUserUpdateFields(req); err != nil {
+		return nil, err
 	}
 
 	// Save updated user in the db
 	return us.UserRepository.UpdateUser(user)
 }	
 
-func (us *UserServiceImpl) UpdatePassword(req *models.UserUpdatePasswordRequest) (*models.UserDB, error) {
+func (us *UserServiceImpl) UpdateUserPassword(req *models.UserUpdatePasswordRequest) (*models.UserDB, error) {
 	// Get user from the db
-	user, err := us.GetUser(email) // Should read the email from the endpoint path
+	user, err := us.GetUser(req.Email)
 
 	if err != nil {
-		return nil, errors.ErrorUserNotExist{email}.Error()
+		return nil, errors.ErrorUserNotExist{req.Email}
 	}
 
 	// Validate password fields
-	if !ValidatePassword(user.Password, req.OldPassword) {
-		return nil, errors.ErrorWrongOldPassword{}.Error()
+	if !service.ValidatePassword(user.Password, req.OldPassword) {
+		return nil, errors.ErrorWrongOldPassword{}
 	}
 
 	if len(req.NewPassword) < 8 {
-		return nil, errors.ErrorPasswordMustHaveLenght8{}.Error()
+		return nil, errors.ErrorPasswordMustHaveLenght8{}
 	}
 
 	// Update password
@@ -94,14 +82,14 @@ func (us *UserServiceImpl) UpdatePassword(req *models.UserUpdatePasswordRequest)
 
 func (us *UserServiceImpl) DeleteUser(email string) (*models.UserDB, error) {
 	// Get user from the db
-	user, err := us.GetUser(email) // Should read the email from the endpoint path
+	user, err := us.GetUser(email) 
 
 	if err != nil {
-		return nil, errors.ErrorUserNotExist{email}.Error()
+		return nil, errors.ErrorUserNotExist{email}
 	}
 
 	// Delete user from the db
-	return us.userRepository.DeleteUser(user)
+	return us.UserRepository.DeleteUser(user)
 }
 	
 

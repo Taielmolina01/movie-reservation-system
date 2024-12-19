@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +11,7 @@ const (
 	Admin Role = "admin"
 )
 
-func GetRoles() ([]string) {
+func GetRoles() []string {
 	return []string{"user", "admin"}
 }
 
@@ -23,14 +22,19 @@ type UserRequest struct {
 	Role     Role   `json:"role" binding:"omitempty,oneof=user admin"`
 }
 
+type UserLoginRequest struct {
+	Email	string `json:"email" binding:"required,email"`
+	Password	string `json:"password" binding:"required,min=8"`
+}
+
 type UserUpdateRequest struct {
-	Email	*string	`json:"email" binding:"omitempty,email"`
 	Name	*string	`json:"name" binding:"omitempty"`
 	Password	*string	`json:"password" binding:"omitempty,min=8"`
 	Role     *Role   `json:"role" binding:"omitempty,oneof=user admin"`
 }
 
 type UserUpdatePasswordRequest struct {
+	Email string `josn:"email" binding:"required,email"`
 	OldPassword string `json:"oldpassword" binding:"required,min=8"`
 	NewPassword string `json:"newpassword" binding:"required,min=8"`
 }
