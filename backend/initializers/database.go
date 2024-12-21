@@ -18,7 +18,7 @@ const (
 	MESSAGE_SUCCESS_CREATING_DB     = "Success creating the database"
 	MESSAGE_SUCCESS_CREATING_TABLES = "Success creating all the tables of the database"
 	MESSAGE_ERROR_CREATING_TABLE    = "Error creating table: %w"
-	DATABASE_NAME                   = "movie_system_db"
+	DATABASE_NAME                   = "movie_reservation_system_db"
 )
 
 func ConnectDB() (*gorm.DB, error) {
