@@ -14,9 +14,9 @@ type Token struct {
 }
 
 type TokenDB struct {
-	ID     uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Token  Token     `gorm:"embedded"`
-	UserID uuid.UUID `gorm:"type:uuid;not null"`
-	User   UserDB    `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Token     Token     `gorm:"embedded"`
+	UserEmail string    `gorm:"type:varchar(255);not null"`
+	User      UserDB    `gorm:"foreignKey:Email;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	gorm.Model
 }

@@ -41,15 +41,16 @@ func (s SeatRow) EnumIndex() int {
 	return int(s)
 }
 
-type Seat struct {
-	Row    SeatRow `gorm:"type:varchar(2);not null"`
-	Number int     `gorm:"not null"`
+type SeatRequest struct {
+	Row    SeatRow `json:"seatRow" binding:"required"`
+	Number int     `json:"number"`
 }
 
 type SeatDB struct {
 	ID           uuid.UUID    `gorm:"type:uuid;primaryKey"`
-	Seat         Seat         `gorm:"embedded"`
+	Row          string       `gorm:"type:varchar(2);not null"`
+	Number       int          `gorm:"type:int"`
 	CinemaRoomID uuid.UUID    `gorm:"type:uuid;not null"`
-	CinemaRoom   CinemaRoomDB `gorm:"foreignKey:CinemaRoomID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	CinemaRoom   CinemaRoomDB `gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	gorm.Model
 }

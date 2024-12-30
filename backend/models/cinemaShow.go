@@ -16,10 +16,10 @@ type CinemaShowDB struct {
 	// FK
 	MovieID uuid.UUID `gorm:"type:uuid;not null"`
 	// Declare relationship CinemaShow - Movie
-	Movie MovieDB `gorm:"foreignKey:MovieID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Movie MovieDB `gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	// FK
 	CinemaRoomID uuid.UUID `gorm:"type:uuid;not null"`
 	// Declare relationship CinemaShow - CinemaRoom
-	CinemaRoom CinemaRoomDB `gorm:"foreignKey:CinemaRoomID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	CinemaRoom CinemaRoomDB `gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	gorm.Model
 }

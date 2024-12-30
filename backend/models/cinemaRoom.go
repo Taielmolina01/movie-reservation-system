@@ -15,6 +15,6 @@ type CinemaRoomDB struct {
 	// FK
 	HeadquarterID uuid.UUID `gorm:"type:uuid;not null"`
 	// Declare relationship CinemaRoom - CinemaHeadquarter
-	Headquarter CinemaHeadquarterDB `gorm:"foreignKey:HeadquarterID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Headquarter CinemaHeadquarterDB `gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	gorm.Model
 }
