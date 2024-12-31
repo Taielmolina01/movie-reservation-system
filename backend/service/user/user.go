@@ -2,7 +2,8 @@ package user
 
 import (
 	"golang.org/x/crypto/bcrypt"
-	"movie-reservation-system/errors"
+	ownErrors "movie-reservation-system/errors"
+	"errors"
 	"movie-reservation-system/models"
 	"movie-reservation-system/repository/user"
 	"movie-reservation-system/service"
@@ -26,6 +27,11 @@ func mapUserRequestToUserDB(req *models.UserRequest) *models.UserDB {
 }
 
 func (us *UserServiceImpl) CreateUser(req *models.UserRequest) (*models.UserDB, error) {
+
+	if req.Role == "" {
+        req.Role = "user"
+    }
+
 	// Validate fields of request
 	if err := service.ValidateUserFields(req); err != nil {
 		return nil, err
@@ -34,15 +40,16 @@ func (us *UserServiceImpl) CreateUser(req *models.UserRequest) (*models.UserDB, 
 	// Call to the db to validate that the user doesnt already exist
 	_, userError := us.GetUser(req.Email)
 
-	if userError != nil {
-		return nil, errors.ErrorUserAlreadyExist{}
+	var userNotExistErr ownErrors.ErrorUserNotExist
+	if userError != nil && !errors.As(userError, &userNotExistErr) {
+		return nil, userError
 	}
 
 	// Must hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), 10)
 
 	if err != nil {
-		return nil, errors.ErrorEncriptyngPassword{}
+		return nil, ownErrors.ErrorEncriptyngPassword{}
 	}
 
 	req.Password = string(hashedPassword)
@@ -63,7 +70,7 @@ func (us *UserServiceImpl) UpdateUser(email string, req *models.UserUpdateReques
 	user, err := us.GetUser(email)
 
 	if err != nil {
-		return nil, errors.ErrorUserNotExist{email}
+		return nil, ownErrors.ErrorUserNotExist{Email:email}
 	}
 
 	if err := service.ValidateAndUpdateUser(req, user); err != nil {
@@ -79,16 +86,16 @@ func (us *UserServiceImpl) UpdateUserPassword(req *models.UserUpdatePasswordRequ
 	user, err := us.GetUser(req.Email)
 
 	if err != nil {
-		return nil, errors.ErrorUserNotExist{req.Email}
+		return nil, ownErrors.ErrorUserNotExist{req.Email}
 	}
 
 	// Validate password fields
 	if !service.ValidatePassword(user.Password, req.OldPassword) {
-		return nil, errors.ErrorWrongOldPassword{}
+		return nil, ownErrors.ErrorWrongOldPassword{}
 	}
 
 	if len(req.NewPassword) < 8 {
-		return nil, errors.ErrorPasswordMustHaveLenght8{}
+		return nil, ownErrors.ErrorPasswordMustHaveLenght8{}
 	}
 
 	// Update password
@@ -103,7 +110,7 @@ func (us *UserServiceImpl) DeleteUser(email string) (*models.UserDB, error) {
 	user, err := us.GetUser(email)
 
 	if err != nil {
-		return nil, errors.ErrorUserNotExist{email}
+		return nil, ownErrors.ErrorUserNotExist{email}
 	}
 
 	// Delete user from the db

@@ -17,7 +17,7 @@ func GetRoles() []string {
 
 type UserRequest struct {
 	Email    string `json:"email" binding:"required,email"`
-	Name     string `json:"name" binding:"required""`
+	Name     string `json:"name" binding:"required"`
 	Password string `json:"password" binding:"required,min=8"`
 	Role     Role   `json:"role" binding:"omitempty,oneof=user admin"`
 }
