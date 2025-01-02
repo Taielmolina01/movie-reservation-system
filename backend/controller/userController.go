@@ -76,12 +76,12 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 			ctx.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
-			return
 		} else {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
 		}
+		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
@@ -106,12 +106,12 @@ func (uc *UserController) UpdateUserPassword(ctx *gin.Context) {
 			ctx.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
-			return
 		} else {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
 		}
+		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{

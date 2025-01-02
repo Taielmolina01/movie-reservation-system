@@ -88,6 +88,12 @@ func (aui *AuthServiceImpl) Login(req *models.UserLoginRequest) (*models.TokenDB
 }
 
 func (aui *AuthServiceImpl) Logout(userEmail string) (*models.TokenDB, error) {
+	_, err := aui.userRepository.GetUser(userEmail)
+
+	if err != nil {
+		return nil, ownErrors.ErrorUserNotExist{}
+	}
+
 	token, err := aui.authRepository.GetToken(userEmail)
 
 	if err != nil {
