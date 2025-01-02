@@ -26,6 +26,8 @@ func SetUpRouterTest() (*gin.Engine, error) {
 		}
 	}
 
-	router := initializers.Init(db)
+	config := initializers.LoadConfig()
+
+	router := initializers.Init(db, config)
 	return router, nil
 }

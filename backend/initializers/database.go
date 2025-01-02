@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"movie-reservation-system/models"
-	"os"
 )
 
 var db *gorm.DB
@@ -21,14 +20,8 @@ const (
 	DATABASE_NAME                   = "movie_reservation_system_db"
 )
 
-func ConnectDB() (*gorm.DB, error) {
-	err := LoadEnvVariables()
-
-	if err != nil {
-		return nil, err
-	}
-
-	dsn := os.Getenv("DB_DSN") + " dbname=postgres"
+func ConnectDB(config *Configuration) (*gorm.DB, error) {
+	dsn := config.DbDsn + " dbname=postgres"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 

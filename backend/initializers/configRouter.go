@@ -4,31 +4,47 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	authController "movie-reservation-system/controller"
 	userController "movie-reservation-system/controller"
+	authRepository "movie-reservation-system/repository/auth"
 	userRepository "movie-reservation-system/repository/user"
+	authService "movie-reservation-system/service/auth"
 	userService "movie-reservation-system/service/user"
 )
 
-func Init(db *gorm.DB) *gin.Engine {
-	userController := setUpUserLayers(db)
+func Init(db *gorm.DB, config *Configuration) *gin.Engine {
+
+	userRepo := userRepository.CreateRepositoryImpl(db)
+
+	userController := setUpUserLayers(db, userRepo)
+	authController := setUpAuthLayers(db, userRepo, config)
 
 	router := gin.Default()
 
 	addCorsConfiguration(router)
 
 	setUpUserRoutes(router, userController)
+	setUpAuthRoutes(router, authController)
 
 	return router
 }
 
-func setUpUserLayers(db *gorm.DB) *userController.UserController {
-	userRepo := userRepository.CreateRepositoryImpl(db)
-
+func setUpUserLayers(db *gorm.DB, userRepo userRepository.UserRepository) *userController.UserController {
 	userService := userService.NewUserServiceImpl(userRepo)
 
 	userController := userController.NewUserController(userService)
 
 	return userController
+}
+
+func setUpAuthLayers(db *gorm.DB, userRepo userRepository.UserRepository, config *Configuration) *authController.AuthController {
+	authRepo := authRepository.NewAuthRepositoryImpl(db)
+
+	authService := authService.NewAuthService(authRepo, userRepo, config.JwtAlgorithm, config.JwtSecret)
+
+	authController := authController.NewAuthController(authService)
+
+	return authController
 }
 
 func addCorsConfiguration(router *gin.Engine) {
@@ -48,4 +64,9 @@ func setUpUserRoutes(router *gin.Engine, userController *userController.UserCont
 		usersGroup.PUT("/:email", userController.UpdateUser)
 		usersGroup.DELETE("/:email", userController.DeleteUser)
 	}
+}
+
+func setUpAuthRoutes(router *gin.Engine, authController *authController.AuthController) {
+	router.POST("/login", authController.Login)
+	router.POST("/logout", authController.Logout)
 }

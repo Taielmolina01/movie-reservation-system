@@ -11,7 +11,6 @@ import (
 	authRepository "movie-reservation-system/repository/auth"
 	userRepository "movie-reservation-system/repository/user"
 	"movie-reservation-system/service"
-	"os"
 	"time"
 )
 
@@ -21,22 +20,25 @@ type AuthServiceImpl struct {
 }
 
 var signingMethod jwt.SigningMethod
+var secretKey []byte
 
 const expiresHours = 2
 
-func init() {
-	algo := os.Getenv("JWT_ALGORITHM")
-	switch algo {
+func chooseSigningMethod(algorithm string, key string) {
+	switch algorithm {
 	case "HS256":
 		signingMethod = jwt.SigningMethodHS256
 	case "RS256":
 		signingMethod = jwt.SigningMethodRS256
 	default:
-		log.Fatalf("Unsupported JWT algorithm: %s", algo)
+		log.Fatalf("Unsupported JWT algorithm: %s", algorithm)
 	}
+	secretKey = []byte(key)
 }
 
-func NewLoginServiceImpl(userRepository userRepository.UserRepository, authRepository authRepository.AuthRepository) AuthService {
+func NewAuthService(authRepository authRepository.AuthRepository, userRepository userRepository.UserRepository, algorithm, secretKey string) AuthService {
+	chooseSigningMethod(algorithm, secretKey)
+
 	return &AuthServiceImpl{
 		userRepository: userRepository,
 		authRepository: authRepository,
@@ -71,7 +73,6 @@ func (aui *AuthServiceImpl) Login(req *models.UserLoginRequest) (*models.TokenDB
 	}
 
 	token := jwt.NewWithClaims(signingMethod, claims)
-	secretKey := []byte(os.Getenv("JWT_SECRET"))
 	signedToken, err := token.SignedString(secretKey)
 	if err != nil {
 		return nil, ownErrors.ErrorSigningToken{TypeError: err}

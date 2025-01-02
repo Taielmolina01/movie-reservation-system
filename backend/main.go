@@ -4,18 +4,23 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"movie-reservation-system/initializers"
-	"os"
 )
 
 func main() {
 
-	db, err := initializers.ConnectDB()
+	config := initializers.LoadConfig()
+
+	if config == nil {
+		log.Fatal()
+	}
+
+	db, err := initializers.ConnectDB(config)
 
 	if err != nil {
 		log.Fatal()
 	}
 
-	r := initializers.Init(db)
+	r := initializers.Init(db, config)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -23,11 +28,5 @@ func main() {
 		})
 	})
 
-	errEnv := initializers.LoadEnvVariables()
-
-	if errEnv != nil {
-		log.Fatal()
-	}
-
-	r.Run(":" + os.Getenv("PORT"))
+	r.Run(":" + config.Port)
 }
