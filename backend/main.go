@@ -2,8 +2,9 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"movie-reservation-system/initializers"
 	"log"
+	"movie-reservation-system/initializers"
+	"os"
 )
 
 func main() {
@@ -22,5 +23,11 @@ func main() {
 		})
 	})
 
-	r.Run()
+	errEnv := initializers.LoadEnvVariables()
+
+	if errEnv != nil {
+		log.Fatal()
+	}
+
+	r.Run(":" + os.Getenv("PORT"))
 }

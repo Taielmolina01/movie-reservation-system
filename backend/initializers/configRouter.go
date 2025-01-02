@@ -6,18 +6,15 @@ import (
 	"gorm.io/gorm"
 	userController "movie-reservation-system/controller"
 	userRepository "movie-reservation-system/repository/user"
-	userService "movie-reservation-system/service/user"	
+	userService "movie-reservation-system/service/user"
 )
 
 func Init(db *gorm.DB) *gin.Engine {
-
-	LoadEnvVariables()
-
 	userController := setUpUserLayers(db)
 
 	router := gin.Default()
 
-    addCorsConfiguration(router)
+	addCorsConfiguration(router)
 
 	setUpUserRoutes(router, userController)
 

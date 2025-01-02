@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -31,8 +32,7 @@ func TestCreateUserWithoutEmail(t *testing.T) {
 	if recorder.Body.String() != expected {
 		t.Errorf("Expected body %s but got %s", expected, recorder.Body.String())
 	}
-	}
-
+}
 
 func TestCreateUserWithInvalidEmail(t *testing.T) {
 	t.Log("Try to create an user with a not email in the email field")
@@ -42,6 +42,7 @@ func TestCreateUserWithInvalidEmail(t *testing.T) {
 	if err != nil {
 		t.Error("Error creating test router")
 	}
+
 	jsonBody := `{"Name": "John Doe", "Email": "invalid-email", "Password": "password123", "Role": "user"}`
 
 	req, _ := http.NewRequest("POST", "/users", bytes.NewBufferString(jsonBody))
@@ -161,10 +162,11 @@ func TestCreateUserWithoutRoles(t *testing.T) {
 	if recorder.Code != http.StatusCreated {
 		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
 	}
+
 	/*
-	expected := `{"message":"user"}`
-	if recorder.Body.String() != expected {
-		t.Errorf("Expected body %s but got %s", expected, recorder.Body.String())
-	}
+		expected := `{"message":"user"}`
+		if recorder.Body.String() != expected {
+			t.Errorf("Expected body %s but got %s", expected, recorder.Body.String())
+		}
 	*/
 }

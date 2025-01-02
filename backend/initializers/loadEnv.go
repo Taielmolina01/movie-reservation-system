@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"path/filepath"
-
 )
 
 const (
@@ -13,9 +12,10 @@ const (
 )
 
 func LoadEnvVariables() error {
-    envFile := filepath.Join(".", ".env") // Should be relative path, idk why doesn't work
-    
-    err := godotenv.Load(envFile)
+	envFile := filepath.Join(".", ".env") // Should be relative path, idk why doesn't work
+
+	err := godotenv.Load(envFile)
+
 	if err != nil {
 		return fmt.Errorf(MESSAGE_ERROR_LOADING_ENV, err)
 	}

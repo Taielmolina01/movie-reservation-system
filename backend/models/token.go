@@ -6,17 +6,12 @@ import (
 	"time"
 )
 
-type Token struct {
+type TokenDB struct {
+	ID           uuid.UUID `gorm:"type:uuid;primaryKey"`
 	AccessToken  string    `gorm:"type:varchar(255);not null"`
 	RefreshToken string    `gorm:"type:varchar(255);not null"`
-	CreatedAt    time.Time `gorm:"not null"`
+	UserEmail    string    `gorm:"type:varchar(255);not null"`
 	ExpiresAt    time.Time `gorm:"not null"`
-}
-
-type TokenDB struct {
-	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
-	Token     Token     `gorm:"embedded"`
-	UserEmail string    `gorm:"type:varchar(255);not null"`
-	User      UserDB    `gorm:"foreignKey:Email;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	User         UserDB    `gorm:"foreignKey:Email;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	gorm.Model
 }

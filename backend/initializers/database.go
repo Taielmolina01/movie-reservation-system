@@ -23,7 +23,7 @@ const (
 
 func ConnectDB() (*gorm.DB, error) {
 	err := LoadEnvVariables()
-	
+
 	if err != nil {
 		return nil, err
 	}

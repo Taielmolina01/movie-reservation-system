@@ -1,9 +1,9 @@
 package user
 
 import (
+	"errors"
 	"golang.org/x/crypto/bcrypt"
 	ownErrors "movie-reservation-system/errors"
-	"errors"
 	"movie-reservation-system/models"
 	"movie-reservation-system/repository/user"
 	"movie-reservation-system/service"
@@ -29,8 +29,8 @@ func mapUserRequestToUserDB(req *models.UserRequest) *models.UserDB {
 func (us *UserServiceImpl) CreateUser(req *models.UserRequest) (*models.UserDB, error) {
 
 	if req.Role == "" {
-        req.Role = "user"
-    }
+		req.Role = "user"
+	}
 
 	// Validate fields of request
 	if err := service.ValidateUserFields(req); err != nil {
@@ -70,7 +70,7 @@ func (us *UserServiceImpl) UpdateUser(email string, req *models.UserUpdateReques
 	user, err := us.GetUser(email)
 
 	if err != nil {
-		return nil, ownErrors.ErrorUserNotExist{Email:email}
+		return nil, ownErrors.ErrorUserNotExist{Email: email}
 	}
 
 	if err := service.ValidateAndUpdateUser(req, user); err != nil {
