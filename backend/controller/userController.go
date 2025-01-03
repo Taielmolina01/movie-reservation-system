@@ -102,7 +102,7 @@ func (uc *UserController) UpdateUserPassword(ctx *gin.Context) {
 	user, err := uc.UserService.UpdateUserPassword(&request)
 
 	if err != nil {
-		if errors.Is(err, ownErrors.ErrorUserNotExist{}) {
+		if errors.Is(err, ownErrors.ErrorUserNotExist{Email: request.Email}) {
 			ctx.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})

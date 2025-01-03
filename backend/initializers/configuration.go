@@ -20,7 +20,7 @@ type Configuration struct {
 }
 
 func LoadConfig() *Configuration {
-	envFile := filepath.Join(".", ".env") // Should be relative path, idk why doesn't work
+	envFile := filepath.Join(".", ".env")
 
 	err := godotenv.Load(envFile)
 

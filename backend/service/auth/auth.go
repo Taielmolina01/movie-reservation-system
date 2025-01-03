@@ -92,7 +92,7 @@ func (aui *AuthServiceImpl) Logout(userEmail string) (*models.TokenDB, error) {
 	_, err := aui.userRepository.GetUser(userEmail)
 
 	if err != nil {
-		return nil, ownErrors.ErrorUserNotExist{}
+		return nil, ownErrors.ErrorUserNotExist{Email: userEmail}
 	}
 
 	token, err := aui.authRepository.GetToken(userEmail)

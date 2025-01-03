@@ -16,6 +16,14 @@ func Init(db *gorm.DB, config *Configuration) *gin.Engine {
 
 	userRepo := userRepository.CreateRepositoryImpl(db)
 
+	if db == nil {
+		panic("db is nil")
+	}
+
+	if config == nil {
+		panic("config is nil")
+	}
+
 	userController := setUpUserLayers(db, userRepo)
 	authController := setUpAuthLayers(db, userRepo, config)
 
@@ -68,5 +76,5 @@ func setUpUserRoutes(router *gin.Engine, userController *userController.UserCont
 
 func setUpAuthRoutes(router *gin.Engine, authController *authController.AuthController) {
 	router.POST("/login", authController.Login)
-	router.POST("/logout", authController.Logout)
+	router.POST("/logout/:email", authController.Logout)
 }

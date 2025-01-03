@@ -12,6 +12,6 @@ type TokenDB struct {
 	RefreshToken string    `gorm:"type:varchar(255);not null"`
 	UserEmail    string    `gorm:"type:varchar(255);not null"`
 	ExpiresAt    time.Time `gorm:"not null"`
-	User         UserDB    `gorm:"foreignKey:Email;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	User         UserDB    `gorm:"foreignKey:UserEmail;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	gorm.Model
 }

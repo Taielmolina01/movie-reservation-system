@@ -30,7 +30,7 @@ func (ac *AuthController) Login(ctx *gin.Context) {
 	token, err := ac.AuthService.Login(&request)
 
 	if err != nil {
-		if errors.Is(err, ownErrors.ErrorUserNotExist{}) {
+		if errors.Is(err, ownErrors.ErrorUserNotExist{Email: request.Email}) {
 			ctx.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -53,8 +53,12 @@ func (ac *AuthController) Logout(ctx *gin.Context) {
 	token, err := ac.AuthService.Logout(email)
 
 	if err != nil {
-		if errors.Is(err, ownErrors.ErrorUserNotExist{}) || errors.Is(err, ownErrors.ErrorUserTokenNotExist{UserEmail: email}) {
+		if errors.Is(err, ownErrors.ErrorUserNotExist{Email: email}) {
 			ctx.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+		} else if errors.Is(err, ownErrors.ErrorUserTokenNotExist{UserEmail: email}) {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
 				"error": err.Error(),
 			})
 		} else {

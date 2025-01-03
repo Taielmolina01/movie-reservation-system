@@ -16,6 +16,10 @@ func main() {
 
 	db, err := initializers.ConnectDB(config)
 
+	if config == nil {
+		log.Fatal("AAAAAAAAAAAAA")
+	}
+
 	if err != nil {
 		log.Fatal()
 	}

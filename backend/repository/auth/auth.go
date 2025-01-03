@@ -42,7 +42,7 @@ func (ar *AuthRepositoryImpl) GetToken(userEmail string) (*models.TokenDB, error
 }
 
 func (ar *AuthRepositoryImpl) DeleteToken(token *models.TokenDB) (*models.TokenDB, error) {
-	result := ar.db.Delete(token)
+	result := ar.db.Delete(&models.TokenDB{}, "id = ?", token.ID) // Aquí usamos el ID directamente en la condición
 
 	if result.Error != nil {
 		return nil, result.Error

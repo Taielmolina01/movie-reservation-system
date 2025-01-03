@@ -28,7 +28,7 @@ func (ur *UserRepositoryImpl) CreateUser(user *models.UserDB) (*models.UserDB, e
 func (ur *UserRepositoryImpl) GetUser(email string) (*models.UserDB, error) {
 	user := &models.UserDB{}
 
-	result := ur.db.First(&models.UserDB{}, "email = ?", email)
+	result := ur.db.First(user, "email = ?", email)
 
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, ownErrors.ErrorUserNotExist{Email: email}

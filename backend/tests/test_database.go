@@ -26,8 +26,16 @@ func SetUpRouterTest() (*gin.Engine, error) {
 		}
 	}
 
-	config := initializers.LoadConfig()
+	config := &initializers.Configuration{
+		Port:         "3000",
+		DbDsn:        "host=localhost user=postgres password=taiel0101 port=5432 sslmode=disable dbname=movie-system-db",
+		JwtAlgorithm: "HS256",
+		JwtSecret:    "ASDADASD",
+	}
 
 	router := initializers.Init(db, config)
+
+	gin.SetMode(gin.ReleaseMode)
+
 	return router, nil
 }
