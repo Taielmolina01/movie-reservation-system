@@ -33,7 +33,6 @@ type UserUpdateRequest struct {
 }
 
 type UserUpdatePasswordRequest struct {
-	Email       string `josn:"email" binding:"required,email"`
 	OldPassword string `json:"oldpassword" binding:"required,min=8"`
 	NewPassword string `json:"newpassword" binding:"required,min=8"`
 }

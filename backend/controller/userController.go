@@ -72,7 +72,7 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 	user, err := uc.UserService.UpdateUser(email, &request)
 
 	if err != nil {
-		if errors.Is(err, ownErrors.ErrorUserNotExist{}) {
+		if errors.Is(err, ownErrors.ErrorUserNotExist{Email: email}) {
 			ctx.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -91,6 +91,7 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 
 func (uc *UserController) UpdateUserPassword(ctx *gin.Context) {
 	var request models.UserUpdatePasswordRequest
+	email := ctx.Param("email")
 
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -99,10 +100,10 @@ func (uc *UserController) UpdateUserPassword(ctx *gin.Context) {
 		return
 	}
 
-	user, err := uc.UserService.UpdateUserPassword(&request)
+	user, err := uc.UserService.UpdateUserPassword(email, &request)
 
 	if err != nil {
-		if errors.Is(err, ownErrors.ErrorUserNotExist{Email: request.Email}) {
+		if errors.Is(err, ownErrors.ErrorUserNotExist{Email: email}) {
 			ctx.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})

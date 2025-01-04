@@ -1,27 +1,17 @@
 package tests
 
 import (
-	"bytes"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 )
 
 func TestLoginNonExistentUser(t *testing.T) {
 	t.Log("Try to login with an user that is not registered")
-	router, err := SetUpRouterTest()
-
-	if err != nil {
-		t.Error("Error creating test router")
-	}
+	router := UseRouter(t)
 
 	jsonBody := `{"Email": "johndoe@gmail.com", "Password": "myPassword"}`
 
-	req, _ := http.NewRequest("POST", "/login", bytes.NewBufferString(jsonBody))
-	req.Header.Set("Content-Type", "application/json")
-
-	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, req)
+	recorder := PerformRequest(t, router, "POST", "/login", jsonBody)
 
 	if recorder.Code != http.StatusNotFound {
 		t.Errorf("Expected status code %d but got %d", http.StatusNotFound, recorder.Code)
@@ -36,19 +26,11 @@ func TestLoginNonExistentUser(t *testing.T) {
 func TestLoginExistentUserWithWrongPassword(t *testing.T) {
 	t.Log("Try to login with an user with wrong password")
 
-	router, err := SetUpRouterTest()
-
-	if err != nil {
-		t.Error("Error creating test router")
-	}
+	router := UseRouter(t)
 
 	jsonBody := `{"name": "John Doe", "email": "johndoe@gmail.com", "password": "myPassword"}`
 
-	req, _ := http.NewRequest("POST", "/users", bytes.NewBufferString(jsonBody))
-	req.Header.Set("Content-Type", "application/json")
-
-	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, req)
+	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
 
 	if recorder.Code != http.StatusCreated {
 		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
@@ -56,11 +38,7 @@ func TestLoginExistentUserWithWrongPassword(t *testing.T) {
 
 	secondJsonBody := `{"Email": "johndoe@gmail.com", "Password": "anotherPassword"}`
 
-	secondReq, _ := http.NewRequest("POST", "/login", bytes.NewBufferString(secondJsonBody))
-	secondReq.Header.Set("Content-Type", "application/json")
-
-	secondRecorder := httptest.NewRecorder()
-	router.ServeHTTP(secondRecorder, secondReq)
+	secondRecorder := PerformRequest(t, router, "POST", "/login", secondJsonBody)
 
 	if secondRecorder.Code != http.StatusBadRequest {
 		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, secondRecorder.Code)
@@ -75,19 +53,11 @@ func TestLoginExistentUserWithWrongPassword(t *testing.T) {
 func TestLoginWithCorrectFields(t *testing.T) {
 	t.Log("Try to login with a registered user with correct password")
 
-	router, err := SetUpRouterTest()
-
-	if err != nil {
-		t.Error("Error creating test router")
-	}
+	router := UseRouter(t)
 
 	jsonBody := `{"name": "John Doe", "email": "johndoe@gmail.com", "password": "myPassword"}`
 
-	req, _ := http.NewRequest("POST", "/users", bytes.NewBufferString(jsonBody))
-	req.Header.Set("Content-Type", "application/json")
-
-	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, req)
+	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
 
 	if recorder.Code != http.StatusCreated {
 		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
@@ -95,11 +65,7 @@ func TestLoginWithCorrectFields(t *testing.T) {
 
 	secondJsonBody := `{"email": "johndoe@gmail.com", "password": "myPassword"}`
 
-	secondReq, _ := http.NewRequest("POST", "/login", bytes.NewBufferString(secondJsonBody))
-	secondReq.Header.Set("Content-Type", "application/json")
-
-	secondRecorder := httptest.NewRecorder()
-	router.ServeHTTP(secondRecorder, secondReq)
+	secondRecorder := PerformRequest(t, router, "POST", "/login", secondJsonBody)
 
 	if secondRecorder.Code != http.StatusOK {
 		t.Errorf("Expected status code %d but got %d", http.StatusOK, secondRecorder.Code)
@@ -118,19 +84,10 @@ func TestLoginWithCorrectFields(t *testing.T) {
 func TestLogoutNonExistentUser(t *testing.T) {
 	t.Log("Try to logout with an non existent user")
 
-	router, err := SetUpRouterTest()
+	router := UseRouter(t)
 
-	if err != nil {
-		t.Error("Error creating test router")
-	}
 
-	jsonBody := `{"Email": "johndoe@gmail.com", "Password": "password123"}`
-
-	req, _ := http.NewRequest("POST", "/login", bytes.NewBufferString(jsonBody))
-	req.Header.Set("Content-Type", "application/json")
-
-	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, req)
+	recorder := PerformRequest(t, router, "POST", "/logout/johndoe@gmail.com", "jsonBody")
 
 	if recorder.Code != http.StatusNotFound {
 		t.Errorf("Expected status code %d but got %d", http.StatusNotFound, recorder.Code)
@@ -145,29 +102,17 @@ func TestLogoutNonExistentUser(t *testing.T) {
 func TestLogoutWithANotLoggedUser(t *testing.T) {
 	t.Log("Try to logout with a not logged user")
 
-	router, err := SetUpRouterTest()
-
-	if err != nil {
-		t.Error("Error creating test router")
-	}
+	router := UseRouter(t)
 
 	jsonBody := `{"name": "John Doe", "email": "johndoe@gmail.com", "password": "myPassword"}`
 
-	req, _ := http.NewRequest("POST", "/users", bytes.NewBufferString(jsonBody))
-	req.Header.Set("Content-Type", "application/json")
-
-	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, req)
+	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
 
 	if recorder.Code != http.StatusCreated {
 		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
 	}
 
-	secondReq, _ := http.NewRequest("POST", "/logout/johndoe@gmail.com", nil)
-	secondReq.Header.Set("Content-Type", "application/json")
-
-	secondRecorder := httptest.NewRecorder()
-	router.ServeHTTP(secondRecorder, secondReq)
+	secondRecorder := PerformRequest(t, router, "POST", "/logout/johndoe@gmail.com", "")
 
 	if secondRecorder.Code != http.StatusUnauthorized {
 		t.Errorf("Expected status code %d but got %d", http.StatusUnauthorized, secondRecorder.Code)
@@ -182,19 +127,11 @@ func TestLogoutWithANotLoggedUser(t *testing.T) {
 func TestLogoutWithALoggedUser(t *testing.T) {
 	t.Log("Try to logout with a logged user")
 
-	router, err := SetUpRouterTest()
-
-	if err != nil {
-		t.Error("Error creating test router")
-	}
+	router := UseRouter(t)
 
 	jsonBody := `{"name": "John Doe", "email": "johndoe@gmail.com", "password": "myPassword"}`
 
-	req, _ := http.NewRequest("POST", "/users", bytes.NewBufferString(jsonBody))
-	req.Header.Set("Content-Type", "application/json")
-
-	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, req)
+	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
 
 	if recorder.Code != http.StatusCreated {
 		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
@@ -202,21 +139,13 @@ func TestLogoutWithALoggedUser(t *testing.T) {
 
 	secondJsonBody := `{"email": "johndoe@gmail.com", "password": "myPassword"}`
 
-	secondReq, _ := http.NewRequest("POST", "/login", bytes.NewBufferString(secondJsonBody))
-	secondReq.Header.Set("Content-Type", "application/json")
-
-	secondRecorder := httptest.NewRecorder()
-	router.ServeHTTP(secondRecorder, secondReq)
+	secondRecorder := PerformRequest(t, router, "POST", "/login", secondJsonBody)
 
 	if secondRecorder.Code != http.StatusOK {
 		t.Errorf("Expected status code %d but got %d", http.StatusOK, secondRecorder.Code)
 	}
 
-	thirdReq, _ := http.NewRequest("POST", "/logout/johndoe@gmail.com", nil)
-	thirdReq.Header.Set("Content-Type", "application/json")
-
-	thirdRecorder := httptest.NewRecorder()
-	router.ServeHTTP(thirdRecorder, thirdReq)
+	thirdRecorder := PerformRequest(t, router, "POST", "/logout/johndoe@gmail.com", "")
 
 	if thirdRecorder.Code != http.StatusOK {
 		t.Errorf("Expected status code %d but got %d", http.StatusOK, thirdRecorder.Code)

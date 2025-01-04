@@ -11,7 +11,7 @@ type UserService interface {
 
 	UpdateUser(string, *models.UserUpdateRequest) (*models.UserDB, error)
 
-	UpdateUserPassword(*models.UserUpdatePasswordRequest) (*models.UserDB, error)
+	UpdateUserPassword(string, *models.UserUpdatePasswordRequest) (*models.UserDB, error)
 
 	DeleteUser(string) (*models.UserDB, error)
 }

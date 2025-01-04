@@ -81,12 +81,12 @@ func (us *UserServiceImpl) UpdateUser(email string, req *models.UserUpdateReques
 	return us.UserRepository.UpdateUser(user)
 }
 
-func (us *UserServiceImpl) UpdateUserPassword(req *models.UserUpdatePasswordRequest) (*models.UserDB, error) {
+func (us *UserServiceImpl) UpdateUserPassword(email string, req *models.UserUpdatePasswordRequest) (*models.UserDB, error) {
 	// Get user from the db
-	user, err := us.GetUser(req.Email)
+	user, err := us.GetUser(email)
 
 	if err != nil {
-		return nil, ownErrors.ErrorUserNotExist{req.Email}
+		return nil, ownErrors.ErrorUserNotExist{Email: email}
 	}
 
 	// Validate password fields

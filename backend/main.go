@@ -10,15 +10,7 @@ func main() {
 
 	config := initializers.LoadConfig()
 
-	if config == nil {
-		log.Fatal()
-	}
-
 	db, err := initializers.ConnectDB(config)
-
-	if config == nil {
-		log.Fatal("AAAAAAAAAAAAA")
-	}
 
 	if err != nil {
 		log.Fatal()

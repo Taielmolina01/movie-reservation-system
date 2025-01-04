@@ -70,6 +70,7 @@ func setUpUserRoutes(router *gin.Engine, userController *userController.UserCont
 		usersGroup.POST("", userController.CreateUser)
 		usersGroup.GET("/:email", userController.GetUser)
 		usersGroup.PUT("/:email", userController.UpdateUser)
+		usersGroup.PUT("/:email/password", userController.UpdateUserPassword)
 		usersGroup.DELETE("/:email", userController.DeleteUser)
 	}
 }
