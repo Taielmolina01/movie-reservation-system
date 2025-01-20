@@ -4,11 +4,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"movie-reservation-system/initializers"
+	"movie-reservation-system/configuration"
 )
 
 func main() {
 
-	config := initializers.LoadConfig()
+	config := configuration.LoadConfig()
 
 	db, err := initializers.ConnectDB(config)
 

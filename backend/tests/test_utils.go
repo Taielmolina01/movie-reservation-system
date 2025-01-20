@@ -9,8 +9,10 @@ import (
 	"movie-reservation-system/models"
 	"net/http"
 	"net/http/httptest"
-	"testing"
 	"bytes"
+	"testing"
+	"encoding/json"
+	"movie-reservation-system/configuration"
 )
 
 func setUpRouterTest() (*gin.Engine, error) {
@@ -27,12 +29,7 @@ func setUpRouterTest() (*gin.Engine, error) {
 		}
 	}
 
-	config := &initializers.Configuration{
-		Port:         "3000",
-		DbDsn:        "host=localhost user=postgres password=taiel0101 port=5432 sslmode=disable dbname=movie-system-db",
-		JwtAlgorithm: "HS256",
-		JwtSecret:    "ASDADASD",
-	}
+	config := configuration.LoadConfigTest("3000", "host=localhost user=postgres password=taiel0101 port=5432 sslmode=disable dbname=movie-system-db", "HS256", "ASDADASD")
 
 	router := initializers.Init(db, config)
 
@@ -69,4 +66,20 @@ func PerformRequest(t *testing.T, router *gin.Engine, method, path, body string)
 	router.ServeHTTP(recorder, req)
 
 	return recorder
+}
+
+func PerformRequestWithRequest(t *testing.T, router *gin.Engine, req *http.Request) *httptest.ResponseRecorder {
+    recorder := httptest.NewRecorder()
+    router.ServeHTTP(recorder, req)
+    return recorder
+}
+
+func GetAccessToken(recorder *httptest.ResponseRecorder) (string, error) {
+	var responseBody models.TokenResponse
+	err := json.Unmarshal(recorder.Body.Bytes(), &responseBody)
+	if err != nil {
+		return "", err
+	}
+
+	return responseBody.AccessToken.AccessToken, nil
 }

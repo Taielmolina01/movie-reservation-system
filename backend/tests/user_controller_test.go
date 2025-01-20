@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 )
 
-// Test user creates
+// Tests of user's creations
 
 func TestCreateUserWithoutEmail(t *testing.T) {
 	t.Log("Try to create an user without email")
@@ -158,7 +158,9 @@ func TestCreateUserWithNonExistentRole(t *testing.T) {
 	}
 }
 
-// Test user updates
+// Test of user updates
+
+// Hacer un test sin loggearse y despues todo lo demás loggeado
 
 func TestUpdateANotExistentUser(t *testing.T) {
 	router := UseRouter(t)
@@ -167,11 +169,11 @@ func TestUpdateANotExistentUser(t *testing.T) {
 
 	recorder := PerformRequest(t, router, "PUT", "/users/johndoe@gmail.com", jsonBody)
 
-	if recorder.Code != http.StatusNotFound {
+	if recorder.Code != http.StatusUnauthorized {
 		t.Errorf("Expected status code %d but got %d", http.StatusNotFound, recorder.Code)
 	}
 
-	expected := `{"error":"User with email johndoe@gmail.com is not registered"}`
+	expected := `{"error":"Missing authentication token"}`
 	if recorder.Body.String() != expected {
 		t.Errorf("Expected body %s but got %s", expected, recorder.Body.String())
 	}
@@ -188,9 +190,18 @@ func TestUpdateUserWithoutName(t *testing.T) {
 		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
 	}
 
+	accessToken, err := GetAccessToken(secondRecorder)
+
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %v", err)
+	}
+
 	secondJsonBody := `{"name":""}`
 
-	secondRecorder := PerformRequest(t, router, "PUT", "/users/johndoe@gmail.com", secondJsonBody)
+	req, _ := http.NewRequest("PUT", "/users/johndoe@gmail.com", secondJsonBody)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	
+	secondRecorder := PerformRequestWithRequest(t, router, req)
 
 	if secondRecorder.Code != http.StatusBadRequest {
 		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, recorder.Code)
@@ -270,7 +281,6 @@ func TestUpdateUserWithValidNameAndRole(t *testing.T) {
 		t.Fatalf("Error decoding response JSON: %v", err)
 	}
 
-	// Verificar los campos actualizados
 	if response.Message.Name != "John Doe II" {
 		t.Errorf("Expected name 'John Doe II', but got '%v'", response.Message.Name)
 	}
@@ -280,7 +290,9 @@ func TestUpdateUserWithValidNameAndRole(t *testing.T) {
 	}
 }
 
-// Test user password update
+// Test of user password updates
+
+// Hacer un test sin loggearse y despues todo lo demás loggeado
 
 func TestUpdateUserPasswordOfUnregisteredUser(t *testing.T) {
 	router := UseRouter(t)
@@ -359,7 +371,9 @@ func TestUpdateUserPasswordWithValidPassword(t *testing.T) {
 	}
 }
 
-// Test user delete
+// Test of user delete
+
+// Hacer un test sin loggearse y despues todo lo demás loggeado
 
 func TestDeleteANonExistentUser(t *testing.T) {
 	router := UseRouter(t)

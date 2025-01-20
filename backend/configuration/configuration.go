@@ -1,4 +1,4 @@
-package initializers
+package configuration
 
 import (
 	"fmt"
@@ -16,8 +16,10 @@ type Configuration struct {
 	Port         string
 	DbDsn        string
 	JwtAlgorithm string
-	JwtSecret    string
+	JwtSecretKey    string
 }
+
+var config *Configuration
 
 func LoadConfig() *Configuration {
 	envFile := filepath.Join(".", ".env")
@@ -31,10 +33,25 @@ func LoadConfig() *Configuration {
 
 	fmt.Println(MESSAGE_SUCCESS_LOADING_ENV)
 
-	return &Configuration{
+	config = &Configuration{
 		Port:         os.Getenv("PORT"),
 		DbDsn:        os.Getenv("DB_DSN"),
 		JwtAlgorithm: os.Getenv("JWT_ALGORITHM"),
-		JwtSecret:    os.Getenv("JWT_SECRET"),
+		JwtSecretKey:    os.Getenv("JWT_SECRET"),
 	}
+	return config
+}
+
+func LoadConfigTest(port, dbDsn, jwtAlgorithm, jwtSecretKey string) *Configuration {
+	config = &Configuration{
+		Port: port,
+		DbDsn: dbDsn,
+		JwtAlgorithm: jwtAlgorithm,
+		JwtSecretKey: jwtSecretKey,
+	}
+	return config
+}
+
+func GetConfiguration() *Configuration {
+	return config
 }

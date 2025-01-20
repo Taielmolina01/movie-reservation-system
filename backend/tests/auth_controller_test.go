@@ -3,6 +3,7 @@ package tests
 import (
 	"net/http"
 	"testing"
+	"movie-reservation-system/models"
 )
 
 func TestLoginNonExistentUser(t *testing.T) {
@@ -81,19 +82,18 @@ func TestLoginWithCorrectFields(t *testing.T) {
 	// Im not so sure about how i should test the response token, so i only check the status for now
 }
 
-func TestLogoutNonExistentUser(t *testing.T) {
+func TestLogoutNotExistentUser(t *testing.T) {
 	t.Log("Try to logout with an non existent user")
 
 	router := UseRouter(t)
 
-
 	recorder := PerformRequest(t, router, "POST", "/logout/johndoe@gmail.com", "jsonBody")
 
-	if recorder.Code != http.StatusNotFound {
+	if recorder.Code != http.StatusUnauthorized {
 		t.Errorf("Expected status code %d but got %d", http.StatusNotFound, recorder.Code)
 	}
 
-	expected := `{"error":"User with email johndoe@gmail.com is not registered"}`
+	expected := `{"error":"Missing authentication token"}` // since i don't have an access token, i can't use one for the logout request
 	if recorder.Body.String() != expected {
 		t.Errorf("Expected body %s but got %s", expected, recorder.Body.String())
 	}
@@ -118,7 +118,7 @@ func TestLogoutWithANotLoggedUser(t *testing.T) {
 		t.Errorf("Expected status code %d but got %d", http.StatusUnauthorized, secondRecorder.Code)
 	}
 
-	expected := `{"error":"User with email johndoe@gmail.com does not have a token"}`
+	expected := `{"error":"Missing authentication token"}` 
 	if secondRecorder.Body.String() != expected {
 		t.Errorf("Expected body %s but got %s", expected, secondRecorder.Body.String())
 	}
@@ -145,18 +145,19 @@ func TestLogoutWithALoggedUser(t *testing.T) {
 		t.Errorf("Expected status code %d but got %d", http.StatusOK, secondRecorder.Code)
 	}
 
-	thirdRecorder := PerformRequest(t, router, "POST", "/logout/johndoe@gmail.com", "")
+	accessToken, err := GetAccessToken(secondRecorder)
+
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %v", err)
+	}
+
+	req, _ := http.NewRequest("POST", "/logout/johndoe@gmail.com", nil)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	
+	thirdRecorder := PerformRequestWithRequest(t, router, req)
 
 	if thirdRecorder.Code != http.StatusOK {
 		t.Errorf("Expected status code %d but got %d", http.StatusOK, thirdRecorder.Code)
 	}
-
-	/*
-		expected := `{"error":"User with email johndoe@gmail.com does not have a token"}`
-		if secondRecorder.Body.String() != expected {
-			t.Errorf("Expected body %s but got %s", expected, thirdRecorder.Body.String())
-		}
-	*/
-
-	// Same issue as with succesful login
 }
+

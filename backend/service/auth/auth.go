@@ -36,6 +36,10 @@ func chooseSigningMethod(algorithm string, key string) {
 	secretKey = []byte(key)
 }
 
+func GetSigningMethod() jwt.SigningMethod {
+	return signingMethod
+}
+
 func NewAuthService(authRepository authRepository.AuthRepository, userRepository userRepository.UserRepository, algorithm, secretKey string) AuthService {
 	chooseSigningMethod(algorithm, secretKey)
 

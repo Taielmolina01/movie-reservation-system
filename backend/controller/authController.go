@@ -43,7 +43,7 @@ func (ac *AuthController) Login(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": token,
+		"access_token": token,
 	})
 }
 

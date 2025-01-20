@@ -10,19 +10,13 @@ import (
 	userRepository "movie-reservation-system/repository/user"
 	authService "movie-reservation-system/service/auth"
 	userService "movie-reservation-system/service/user"
+	"movie-reservation-system/infrastructure/middleware"
+	"movie-reservation-system/configuration"
 )
 
-func Init(db *gorm.DB, config *Configuration) *gin.Engine {
+func Init(db *gorm.DB, config *configuration.Configuration) *gin.Engine {
 
 	userRepo := userRepository.CreateRepositoryImpl(db)
-
-	if db == nil {
-		panic("db is nil")
-	}
-
-	if config == nil {
-		panic("config is nil")
-	}
 
 	userController := setUpUserLayers(db, userRepo)
 	authController := setUpAuthLayers(db, userRepo, config)
@@ -31,8 +25,8 @@ func Init(db *gorm.DB, config *Configuration) *gin.Engine {
 
 	addCorsConfiguration(router)
 
-	setUpUserRoutes(router, userController)
-	setUpAuthRoutes(router, authController)
+	setUpUserRoutes(router, db, userController)
+	setUpAuthRoutes(router, db, authController)
 
 	return router
 }
@@ -45,10 +39,10 @@ func setUpUserLayers(db *gorm.DB, userRepo userRepository.UserRepository) *userC
 	return userController
 }
 
-func setUpAuthLayers(db *gorm.DB, userRepo userRepository.UserRepository, config *Configuration) *authController.AuthController {
+func setUpAuthLayers(db *gorm.DB, userRepo userRepository.UserRepository, config *configuration.Configuration) *authController.AuthController {
 	authRepo := authRepository.NewAuthRepositoryImpl(db)
 
-	authService := authService.NewAuthService(authRepo, userRepo, config.JwtAlgorithm, config.JwtSecret)
+	authService := authService.NewAuthService(authRepo, userRepo, config.JwtAlgorithm, config.JwtSecretKey)
 
 	authController := authController.NewAuthController(authService)
 
@@ -64,18 +58,18 @@ func addCorsConfiguration(router *gin.Engine) {
 	router.Use(cors.New(config))
 }
 
-func setUpUserRoutes(router *gin.Engine, userController *userController.UserController) {
+func setUpUserRoutes(router *gin.Engine, db *gorm.DB, userController *userController.UserController) {
 	usersGroup := router.Group("/users")
 	{
 		usersGroup.POST("", userController.CreateUser)
 		usersGroup.GET("/:email", userController.GetUser)
-		usersGroup.PUT("/:email", userController.UpdateUser)
-		usersGroup.PUT("/:email/password", userController.UpdateUserPassword)
-		usersGroup.DELETE("/:email", userController.DeleteUser)
+		usersGroup.PUT("/:email", middleware.AuthMiddleware(db), userController.UpdateUser)
+		usersGroup.PUT("/:email/password", middleware.AuthMiddleware(db),userController.UpdateUserPassword)
+		usersGroup.DELETE("/:email", middleware.AuthMiddleware(db),userController.DeleteUser)
 	}
 }
 
-func setUpAuthRoutes(router *gin.Engine, authController *authController.AuthController) {
+func setUpAuthRoutes(router *gin.Engine, db *gorm.DB, authController *authController.AuthController) {
 	router.POST("/login", authController.Login)
-	router.POST("/logout/:email", authController.Logout)
+	router.POST("/logout/:email", middleware.AuthMiddleware(db), authController.Logout)
 }
