@@ -74,6 +74,7 @@ func PerformRequestWithRequest(t *testing.T, router *gin.Engine, req *http.Reque
     return recorder
 }
 
+
 func GetAccessToken(recorder *httptest.ResponseRecorder) (string, error) {
 	var responseBody models.TokenResponse
 	err := json.Unmarshal(recorder.Body.Bytes(), &responseBody)
@@ -82,4 +83,37 @@ func GetAccessToken(recorder *httptest.ResponseRecorder) (string, error) {
 	}
 
 	return responseBody.AccessToken.AccessToken, nil
+}
+
+type UserLoginData struct {
+	Name	string
+	Email	string
+	Password	string
+	Role	string
+}
+
+func CreateUserAndLogin(userData UserLoginData, t *testing.T, router *gin.Engine) string {
+	jsonBody := fmt.Sprintf(`{"name": "%s", "email": "%s", "password": "%s", "role": "%s"}`, userData.Name, userData.Email, userData.Password, userData.Role)
+
+	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
+
+	if recorder.Code != http.StatusCreated {
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, recorder.Code)
+	}
+
+	secondJsonBody := fmt.Sprintf(`{"email": "%s", "password": "%s"}`, userData.Email, userData.Password)
+
+	secondRecorder := PerformRequest(t, router, "POST", "/login", secondJsonBody)
+
+	if secondRecorder.Code != http.StatusOK {
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, secondRecorder.Code)
+	}
+
+	accessToken, err := GetAccessToken(secondRecorder)
+
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %v", err)
+	}
+
+	return accessToken
 }

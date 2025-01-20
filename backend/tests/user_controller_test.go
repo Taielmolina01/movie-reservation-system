@@ -3,6 +3,8 @@ package tests
 import (
 	"net/http"
 	"testing"
+	"fmt"
+	"strings"
 	"encoding/json"
 )
 
@@ -169,11 +171,11 @@ func TestUpdateANotExistentUser(t *testing.T) {
 
 	recorder := PerformRequest(t, router, "PUT", "/users/johndoe@gmail.com", jsonBody)
 
-	if recorder.Code != http.StatusUnauthorized {
+	if recorder.Code != http.StatusNotFound {
 		t.Errorf("Expected status code %d but got %d", http.StatusNotFound, recorder.Code)
 	}
 
-	expected := `{"error":"Missing authentication token"}`
+	expected := `{"error":"User with email johndoe@gmail.com is not registered"}`
 	if recorder.Body.String() != expected {
 		t.Errorf("Expected body %s but got %s", expected, recorder.Body.String())
 	}
@@ -182,29 +184,24 @@ func TestUpdateANotExistentUser(t *testing.T) {
 func TestUpdateUserWithoutName(t *testing.T) {
 	router := UseRouter(t)
 
-	jsonBody := `{"name": "John Doe", "email": "johndoe@gmail.com", "password": "myPassword", "role": "user"}`
-
-	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
-
-	if recorder.Code != http.StatusCreated {
-		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
+	user := UserLoginData{
+		Name:	"John Doe",
+		Email:	"johndoe@gmail.com",
+		Password:	"myPassword",
+		Role:	"user",
 	}
 
-	accessToken, err := GetAccessToken(secondRecorder)
-
-	if err != nil {
-		t.Fatalf("Failed to unmarshal response body: %v", err)
-	}
+	accessToken := CreateUserAndLogin(user, t, router)
 
 	secondJsonBody := `{"name":""}`
 
-	req, _ := http.NewRequest("PUT", "/users/johndoe@gmail.com", secondJsonBody)
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s", user.Email), strings.NewReader(secondJsonBody))
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	
 	secondRecorder := PerformRequestWithRequest(t, router, req)
 
 	if secondRecorder.Code != http.StatusBadRequest {
-		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, recorder.Code)
+		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, secondRecorder.Code)
 	}
 
 	expected := `{"error":"User must have a name"}`
@@ -216,58 +213,69 @@ func TestUpdateUserWithoutName(t *testing.T) {
 func TestUpdateUserWithoutRole(t *testing.T) {
 	router := UseRouter(t)
 
-	jsonBody := `{"name": "John Doe", "email": "johndoe@gmail.com", "password": "myPassword", "role": "user"}`
-
-	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
-
-	if recorder.Code != http.StatusCreated {
-		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
+	user := UserLoginData{
+		Name:	"John Doe",
+		Email:	"johndoe@gmail.com",
+		Password:	"myPassword",
+		Role:	"user",
 	}
 
-	secondJsonBody := `{"role":""}`
+	accessToken := CreateUserAndLogin(user, t, router)
 
-	secondRecorder := PerformRequest(t, router, "PUT", "/users/johndoe@gmail.com", secondJsonBody)
+	jsonBody := `{"role":""}`
 
-	if secondRecorder.Code != http.StatusBadRequest {
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s", user.Email), strings.NewReader(jsonBody))
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	
+	recorder := PerformRequestWithRequest(t, router, req)
+
+	if recorder.Code != http.StatusBadRequest {
 		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, recorder.Code)
 	}
 
 	expected := `{"error":"Invalid request body: Key: 'UserUpdateRequest.Role' Error:Field validation for 'Role' failed on the 'oneof' tag"}`
+	if recorder.Body.String() != expected {
+		t.Errorf("Expected body %s but got %s", expected, recorder.Body.String())
+	}
+
+	secondJsonBody := `{"role": "adminuser"}`
+
+	req2, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s", user.Email), strings.NewReader(secondJsonBody))
+	req2.Header.Set("Authorization", "Bearer "+accessToken)
+
+	secondRecorder := PerformRequestWithRequest(t, router, req2)
+
+	if secondRecorder.Code != http.StatusBadRequest {
+		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, secondRecorder.Code)
+	}
+
 	if secondRecorder.Body.String() != expected {
 		t.Errorf("Expected body %s but got %s", expected, secondRecorder.Body.String())
-	}
-
-	thirdJsonBody := `{"role": "adminuser"}`
-
-	thirdRecorder := PerformRequest(t, router, "PUT", "/users/johndoe@gmail.com", thirdJsonBody)
-
-	if thirdRecorder.Code != http.StatusBadRequest {
-		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, recorder.Code)
-	}
-
-	if thirdRecorder.Body.String() != expected {
-		t.Errorf("Expected body %s but got %s", expected, thirdRecorder.Body.String())
 	}
 }
 
 func TestUpdateUserWithValidNameAndRole(t *testing.T) {
 	router := UseRouter(t)
 
-	jsonBody := `{"name": "John Doe", "email": "johndoe@gmail.com", "password": "myPassword", "role": "user"}`
-
-	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
-
-	if recorder.Code != http.StatusCreated {
-		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
+	user := UserLoginData{
+		Name:	"John Doe",
+		Email:	"johndoe@gmail.com",
+		Password:	"myPassword",
+		Role:	"user",
 	}
 
-	secondJsonBody := `{"name":"John Doe II", "role": "admin"}`
+	accessToken := CreateUserAndLogin(user, t, router)
 
-	secondRecorder := PerformRequest(t, router, "PUT", "/users/johndoe@gmail.com", secondJsonBody)
+	jsonBody := `{"name":"John Doe II", "role": "admin"}`
 
-	if secondRecorder.Code != http.StatusOK {
-		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, secondRecorder.Code)
-	}	
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s", user.Email), strings.NewReader(jsonBody))
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+
+	recorder := PerformRequestWithRequest(t, router, req)
+
+	if recorder.Code != http.StatusOK {
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, recorder.Code)
+	}
 
 	var response struct {
 		Message struct {
@@ -276,7 +284,8 @@ func TestUpdateUserWithValidNameAndRole(t *testing.T) {
 			Email string `json:"Email"`
 		} `json:"message"`
 	}
-	err := json.Unmarshal(secondRecorder.Body.Bytes(), &response)
+
+	err := json.Unmarshal(recorder.Body.Bytes(), &response)
 	if err != nil {
 		t.Fatalf("Error decoding response JSON: %v", err)
 	}
@@ -314,60 +323,72 @@ func TestUpdateUserPasswordOfUnregisteredUser(t *testing.T) {
 func TestUpdateUserPasswordWithInvalidOldPassword(t *testing.T) {
 	router := UseRouter(t)
 
-	jsonBody := `{"name": "John Doe", "email": "johndoe@gmail.com", "password": "myPassword", "role": "user"}`
-
-	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
-
-	if recorder.Code != http.StatusCreated {
-		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
+	user := UserLoginData{
+		Name:	"John Doe",
+		Email:	"johndoe@gmail.com",
+		Password:	"myPassword",
+		Role:	"user",
 	}
 
-	secondJsonBody := `{"OldPassword": "notMyPassword", "NewPassword": "myAttempOfNewPassword"}`
+	accessToken := CreateUserAndLogin(user, t, router)
 
-	secondRecorder := PerformRequest(t, router, "PUT", "/users/johndoe@gmail.com/password", secondJsonBody)
+	jsonBody := `{"OldPassword": "notMyPassword", "NewPassword": "myAttempOfNewPassword"}`
 
-	if secondRecorder.Code != http.StatusBadRequest {
-		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, secondRecorder.Code)
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s/password", user.Email), strings.NewReader(jsonBody))
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+
+	recorder := PerformRequestWithRequest(t, router, req)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, recorder.Code)
 	}
 }
 
 func TestUpdateUserPasswordWithLengthLessThanEight(t *testing.T) {
 	router := UseRouter(t)
 
-	jsonBody := `{"name": "John Doe", "email": "johndoe@gmail.com", "password": "myPassword", "role": "user"}`
-
-	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
-
-	if recorder.Code != http.StatusCreated {
-		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
+	user := UserLoginData{
+		Name:	"John Doe",
+		Email:	"johndoe@gmail.com",
+		Password:	"myPassword",
+		Role:	"user",
 	}
 
-	secondJsonBody := `{"OldPassword": "myPassword", "NewPassword": "short"}`
+	accessToken := CreateUserAndLogin(user, t, router)
 
-	secondRecorder := PerformRequest(t, router, "PUT", "/users/johndoe@gmail.com/password", secondJsonBody)
+	jsonBody := `{"OldPassword": "myPassword", "NewPassword": "short"}`
 
-	if secondRecorder.Code != http.StatusBadRequest {
-		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, secondRecorder.Code)
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s/password", user.Email), strings.NewReader(jsonBody))
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+
+	recorder := PerformRequestWithRequest(t, router, req)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Errorf("Expected status code %d but got %d", http.StatusBadRequest, recorder.Code)
 	}
 }
 
 func TestUpdateUserPasswordWithValidPassword(t *testing.T) {
 	router := UseRouter(t)
 
-	jsonBody := `{"name": "John Doe", "email": "johndoe@gmail.com", "password": "myPassword", "role": "user"}`
-
-	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
-
-	if recorder.Code != http.StatusCreated {
-		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
+	user := UserLoginData{
+		Name:	"John Doe",
+		Email:	"johndoe@gmail.com",
+		Password:	"myPassword",
+		Role:	"user",
 	}
 
-	secondJsonBody := `{"OldPassword": "myPassword", "NewPassword": "myLongPassword"}`
+	accessToken := CreateUserAndLogin(user, t, router)
 
-	secondRecorder := PerformRequest(t, router, "PUT", "/users/johndoe@gmail.com/password", secondJsonBody)
+	jsonBody := `{"OldPassword": "myPassword", "NewPassword": "myLongPassword"}`
 
-	if secondRecorder.Code != http.StatusOK {
-		t.Errorf("Expected status code %d but got %d", http.StatusOK, secondRecorder.Code)
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s/password", user.Email), strings.NewReader(jsonBody))
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+
+	recorder := PerformRequestWithRequest(t, router, req)
+
+	if recorder.Code != http.StatusOK {
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, recorder.Code)
 	}
 }
 
@@ -393,12 +414,24 @@ func TestDeleteANonExistentUser(t *testing.T) {
 func TestDeleteAnExistentUser(t *testing.T) {
 	router := UseRouter(t)
 
-	jsonBody := `{"name": "John Doe", "email": "johndoe@gmail.com", "password": "myPassword", "role": "user"}`
+	user := UserLoginData{
+		Name:	"John Doe",
+		Email:	"johndoe@gmail.com",
+		Password:	"myPassword",
+		Role:	"user",
+	}
 
-	recorder := PerformRequest(t, router, "POST", "/users", jsonBody)
+	accessToken := CreateUserAndLogin(user, t, router)
 
-	if recorder.Code != http.StatusCreated {
-		t.Errorf("Expected status code %d but got %d", http.StatusCreated, recorder.Code)
+	jsonBody := `{"OldPassword": "myPassword", "NewPassword": "myLongPassword"}`
+
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s/password", user.Email), strings.NewReader(jsonBody))
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+
+	recorder := PerformRequestWithRequest(t, router, req)
+
+	if recorder.Code != http.StatusOK {
+		t.Errorf("Expected status code %d but got %d", http.StatusOK, recorder.Code)
 	}
 
 	secondRecorder := PerformRequest(t, router, "GET", "/users/johndoe@gmail.com", "")
@@ -407,7 +440,10 @@ func TestDeleteAnExistentUser(t *testing.T) {
 		t.Errorf("Expected status code %d but got %d", http.StatusOK, secondRecorder.Code)
 	}
 
-	thirdRecorder := PerformRequest(t, router, "DELETE", "/users/johndoe@gmail.com", "")
+	req2, _ := http.NewRequest("DELETE", fmt.Sprintf("/users/%s", user.Email), strings.NewReader(""))
+	req2.Header.Set("Authorization", "Bearer "+accessToken)
+
+	thirdRecorder := PerformRequestWithRequest(t, router, req2)
 
 	if thirdRecorder.Code != http.StatusOK {
 		t.Errorf("Expected status code %d but got %d", http.StatusOK, thirdRecorder.Code)

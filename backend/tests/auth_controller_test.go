@@ -3,7 +3,6 @@ package tests
 import (
 	"net/http"
 	"testing"
-	"movie-reservation-system/models"
 )
 
 func TestLoginNonExistentUser(t *testing.T) {
@@ -89,11 +88,11 @@ func TestLogoutNotExistentUser(t *testing.T) {
 
 	recorder := PerformRequest(t, router, "POST", "/logout/johndoe@gmail.com", "jsonBody")
 
-	if recorder.Code != http.StatusUnauthorized {
+	if recorder.Code != http.StatusNotFound {
 		t.Errorf("Expected status code %d but got %d", http.StatusNotFound, recorder.Code)
 	}
 
-	expected := `{"error":"Missing authentication token"}` // since i don't have an access token, i can't use one for the logout request
+	expected := `{"error":"User with email johndoe@gmail.com is not registered"}`
 	if recorder.Body.String() != expected {
 		t.Errorf("Expected body %s but got %s", expected, recorder.Body.String())
 	}

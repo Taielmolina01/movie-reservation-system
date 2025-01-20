@@ -6,18 +6,27 @@ import (
 	"movie-reservation-system/models"
     "strings"
     "gorm.io/gorm"
+    "fmt"
 	"github.com/golang-jwt/jwt/v5"
     "movie-reservation-system/service/auth"
-    "fmt"
     "movie-reservation-system/configuration"
+    "movie-reservation-system/errors"
 )
 
 func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
     return func(c *gin.Context) {
+        email := c.Param("email")
+
+        var user models.UserDB
+        if err := db.First(&user, "email = ?", email).Error; err != nil {
+            c.JSON(http.StatusNotFound, gin.H{"error": errors.ErrorUserNotExist{Email: email}.Error()})
+            c.Abort()
+            return
+        }
+
         tokenString := c.GetHeader("Authorization")
         if tokenString == "" {
             c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing authentication token"})
-            fmt.Println("Aca")
             c.Abort()
             return
         }
@@ -26,7 +35,6 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
         tokenParts := strings.Split(tokenString, " ")
         if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
             c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authentication token"})
-            fmt.Println("Aca2")
             c.Abort()
             return
         }
@@ -37,7 +45,6 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
         claims, err := verifyToken(tokenString)
         if err != nil {
             c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authentication token"})
-            fmt.Println("Aca3")
             c.Abort()
             return
         }
@@ -45,15 +52,12 @@ func AuthMiddleware(db *gorm.DB) gin.HandlerFunc {
         userEmail, ok := claims["email"].(string)
         if !ok {
             c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
-            fmt.Println("Aca4")
             c.Abort()
             return
         }
 
-        var user models.UserDB
-        if err := db.First(&user, "email = ?", userEmail).Error; err != nil {
-            c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-            fmt.Println("Aca5")
+        if userEmail != email {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Emails dont match"})
             c.Abort()
             return
         }
