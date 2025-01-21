@@ -3,7 +3,9 @@ import './footerLanding.css'
 function FooterLanding() {
     return (
         <footer className='footer-landing'>
-            <h1>CinemaChainName</h1>
+            <p>
+                Cinema Chain name. All rights reserved.
+            </p>
         </footer>
     )
 }
