@@ -1,0 +1,19 @@
+.footer-landing {
+    --footer-landing-bg-color: #113747;
+    background-color: var(--footer-landing-bg-color);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    gap: 10px;
+    padding: 20px 0;
+}
+
+.footer-landing p {
+    font-size: 16px;
+    padding: 0;
+    margin: 0;
+}

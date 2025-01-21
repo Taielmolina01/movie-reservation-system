@@ -1,0 +1,60 @@
+nav {
+    --navbar-background-color: #113747;
+    ---text-color: white;
+    background-color: var(--navbar-background-color);
+    color: var(---text-color);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.nav-real-content {
+    width: 98%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-real-content h1 {
+    margin: 0;
+    padding: 0;
+}
+
+button {
+    padding: 10px 30px;
+    font-weight: bolder;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.box-right {
+    display: flex;
+    gap: 3px;
+}
+
+.sign-in-button {
+    background-color: var(--navbar-background-color);
+    color: var(---text-color);
+    border-width: 0;
+}
+
+.sign-in-button:hover {
+    --sign-in-button-bg-color: #1A7A8D;
+    background-color: var(--sign-in-button-bg-color);
+    cursor: pointer;
+}
+
+.register-button {
+    --register-button-background-color: #1A718D;
+    background-color: var(--register-button-background-color);
+    color: var(---text-color);
+    border-width: 0;
+}
+
+.register-button:hover {
+    --register-button-hover-bg-color: #051828;
+    cursor: pointer;
+    background-color: var(--register-button-hover-bg-color);
+}
