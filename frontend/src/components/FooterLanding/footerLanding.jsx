@@ -4,7 +4,7 @@ function FooterLanding() {
     return (
         <footer className='footer-landing'>
             <p>
-                Cinema Chain name. All rights reserved.
+                © Cinema Chain name. All rights reserved.
             </p>
         </footer>
     )
