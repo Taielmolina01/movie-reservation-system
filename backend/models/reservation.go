@@ -13,9 +13,9 @@ type Reservation struct {
 type ReservationDB struct {
 	ID           uuid.UUID    `gorm:"type:uuid;primaryKey"`
 	Reservation  Reservation  `gorm:"embedded"`
-	UserID       uuid.UUID    `gorm:"type:uuid;not null"`
-	User         UserDB       `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	UserEmail    string       `gorm:"type:varchar(255);not null"`
+	User         UserDB       `gorm:"foreignKey:Email;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	CinemaShowID uuid.UUID    `gorm:"type:uuid;not null"`
-	CinemaShow   CinemaShowDB `gorm:"foreignKey:CinemaShowID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	CinemaShow   CinemaShowDB `gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	gorm.Model
 }

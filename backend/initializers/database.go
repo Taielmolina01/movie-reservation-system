@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"movie-reservation-system/models"
-	"os"
+	"movie-reservation-system/configuration"
 )
 
 var db *gorm.DB
@@ -18,16 +18,11 @@ const (
 	MESSAGE_SUCCESS_CREATING_DB     = "Success creating the database"
 	MESSAGE_SUCCESS_CREATING_TABLES = "Success creating all the tables of the database"
 	MESSAGE_ERROR_CREATING_TABLE    = "Error creating table: %w"
-	DATABASE_NAME                   = "movie_system_db"
+	DATABASE_NAME                   = "movie_reservation_system_db"
 )
 
-func ConnectDB() (*gorm.DB, error) {
-	err := LoadEnvVariables()
-	if err != nil {
-		return nil, err
-	}
-
-	dsn := os.Getenv("DB_DSN") + " dbname=postgres"
+func ConnectDB(config *configuration.Configuration) (*gorm.DB, error) {
+	dsn := config.DbDsn + " dbname=postgres"
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 

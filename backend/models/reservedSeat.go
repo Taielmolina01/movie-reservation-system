@@ -5,11 +5,17 @@ import (
 	"gorm.io/gorm"
 )
 
+type ReservedSeatRequest struct {
+	ID            uuid.UUID `json:"number"`
+	SeatID        uuid.UUID `json:"number"`
+	ReservationID uuid.UUID `json:"number"`
+}
+
 type ReservedSeatDB struct {
 	ID            uuid.UUID     `gorm:"type:uuid;primaryKey"`
 	SeatID        uuid.UUID     `gorm:"type:uuid;not null"`
-	Seat          SeatDB        `gorm:"foreignKey:SeatID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Seat          SeatDB        `gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	ReservationID uuid.UUID     `gorm:"type:uuid;not null"`
-	Reservation   ReservationDB `gorm:"foreignKey:ReservationID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	Reservation   ReservationDB `gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	gorm.Model
 }

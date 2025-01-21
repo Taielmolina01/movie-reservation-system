@@ -6,22 +6,22 @@ import (
 )
 
 type CinemaHeadquarter struct {
-	Name string `gorm:"type:varchar(100);not null"`
+	Name string `json:"name" binding:"required"`
 }
 
 type CinemaHeadquarterDB struct {
-	ID                uuid.UUID         `gorm:"type:uuid;primaryKey"`
-	CinemaHeadquarter CinemaHeadquarter `gorm:"embedded"`
+	ID   uuid.UUID `gorm:"type:uuid;primaryKey"`
+	Name string    `gorm:"type:varchar(100);not null"`
 	// FK
 	CinemaChainID uuid.UUID `gorm:"type:uuid;not null"`
 	// Declare the relationship CinemaHeadquarter - CinemaChain.
 	// If the CinemaChainID is updated, it will be updated in this table.
 	// By the other hand if I want to delete a CinemaChain having CinemaHeadquarters, i won't be able to do it.
-	CinemaChain CinemaChainDB `gorm:"foreignKey:CinemaChainID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	CinemaChain CinemaChainDB `gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	// FK
 	HeadquarterAdressID uuid.UUID `gorm:"type:uuid;not null`
 	// Declare the relationship CinemaHeadquarter - Adress
-	HeadquarterAdress AdressDB `gorm:"foreignKey:HeadquarterAdressID;constraint:OnUpdate:Cascade,OnDelete:RESTRICT"`
+	HeadquarterAdress AdressDB `gorm:"foreignKey:ID;constraint:OnUpdate:Cascade,OnDelete:RESTRICT"`
 
 	gorm.Model
 }
