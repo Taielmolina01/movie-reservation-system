@@ -7,7 +7,7 @@
     justify-content: center;
 }
 
-.form-container {
+.form-sign-in-container {
     --form-background-color: #214757;
     background-color: var(--form-background-color);
     color: white;
@@ -16,24 +16,25 @@
     padding: 20px;
     border-radius: 5px;
     border: 2px solid #455C68;
+    gap: 10px;
 }
 
-.form-container h3 {
+.form-sign-in-container h3 {
     margin: 0;
     padding-bottom: 10px;
 }
 
-.form-container form {
+.form-sign-in-container form {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.form-container form label {
+.form-sign-in-container form label {
     font-size: 15px;
 }
 
-.form-container form input {
+.form-sign-in-container form input {
     padding: 3px 1px;
     border-radius: 4px;
 }
@@ -45,8 +46,22 @@
     background-color: #063242;
 }
 
-
 .sign-in-form-button:hover {
     cursor: pointer;
     background-color: #032939;
+}
+
+.form-sign-in-container a {
+    cursor: pointer;
+    color: #29B4D1;
+    text-decoration: underline;
+}
+
+
+p {
+    margin: 0
+}
+
+.dont-have-an-account {
+    text-align: center;
 }

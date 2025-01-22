@@ -5,7 +5,6 @@ import RegisterPage from './pages/registerPage/registerPage'
 import SignInPage from './pages/signInPage/signInPage'
 
 function App() {
-
   return (
     <>
       <BrowserRouter>

@@ -1,11 +1,12 @@
 import './navbarLanding.css'
 import { Link } from "react-router-dom";
+import { CinemaChainName } from '../../utils';
 
 function NavbarLanding() {
     return (
         <nav>
             <div className='nav-real-content'>
-                <h1>CinemaChainName</h1>
+                <h1>{CinemaChainName}</h1>
                 <div className='box-right'>
                     <Link to="/sign-in">           
                         <button className='sign-in-button'>

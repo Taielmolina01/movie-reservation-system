@@ -1,10 +1,11 @@
 import './footerLanding.css'
+import { CinemaChainName } from '../../utils';
 
 function FooterLanding() {
     return (
         <footer className='footer-landing'>
             <p>
-                © Cinema Chain name. All rights reserved.
+                © {CinemaChainName}. All rights reserved.
             </p>
         </footer>
     )
